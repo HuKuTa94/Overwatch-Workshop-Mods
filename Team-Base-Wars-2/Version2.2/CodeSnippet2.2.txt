@@ -1,0 +1,3987 @@
+variables
+{
+	global:
+		0: Team1Money
+		1: Team2Money
+		2: Team1CommanderId
+		3: Team2CommanderId
+		4: Team1Build
+		5: Team2Build
+		6: MoneyStorageRadius
+		7: SpawnZoneRadius
+		8: HealingZoneRadius
+		9: MoneyStorageCost
+		10: SpawnZoneCost
+		11: HealingZoneCost
+		12: Team1MoneyStoragePos
+		13: Team2MoneyStoragePos
+		14: Team1SpawnZonePos
+		15: Team2SpawnZonePos
+		16: Team1HealingZonePos
+		17: Team2HealingZonePos
+		18: VictoryMoney
+		19: Team1CommanderInfoTextId
+		20: Team2CommanderInfoTextId
+		21: Team1CommanderDelay
+		22: Team2CommanderDelay
+		23: CommanderDelayMax
+		24: ArrayBuildingPos
+		25: Team1AirstrikeEffectsId
+		26: Team2AirstrikeEffectsId
+		27: Team1SpawnZoneWavesLeft
+		28: Team2SpawnZoneWavesLeft
+		29: Team1SpawnZoneTimeWave
+		30: Team2SpawnZoneTimeWave
+		31: SpawnZoneTimeMax
+		32: Team1MoneyStorageHealth
+		33: Team2MoneyStorageHealth
+		34: Team1MoneyStorageIconId
+		35: Team2MoneyStorageIconId
+		36: Team1SpawnZoneIconId
+		37: Team2SpawnZoneIconId
+		38: Team1HealingZoneIconId
+		39: Team2HealingZoneIconId
+		40: ResourcePointCurrentPos
+		41: SpawnZoneWavesMax
+		42: Team1SpawnZoneWavePlayers
+		43: NotAllowedBuildPlacesPosition
+		44: NotAllowedBuildPlacesRadius
+		45: Team1ExtractorPos
+		46: Team2ExtractorPos
+		49: ExtractorRadius
+		50: ResourcePointArrayPos
+		51: ResourcePointRadius
+		52: ResourcePointTeam
+		53: ResourcePointAmount
+		54: ResourcePointEffectsId
+		55: ResourcePointBeamEffectStart
+		56: PlayerMoneyMax
+		57: Team2SpawnZoneWavePlayers
+		58: MoneyDropPositions
+		59: MoneyDropValues
+		60: MoneyDropEffectIds
+		61: ResourcePointBeamEffectEnd
+		62: MoneyDropNew
+		63: MoneyDropNewPos
+		64: Team1BuildingEffectsIds
+		65: Team2BuildingEffectsIds
+		66: ResourcePointIterator
+		67: ExtractorCost
+		68: ResourcePointLastPos
+		69: ResourcePointMinDistanceForSpawn
+
+	player:
+		0: MenuState
+		1: SpawnZoneCanRespawn
+		2: MenuInfoTextId
+		3: MenuItemTextId
+		4: ShopItem
+		5: SelectedItemCost
+		6: SelectedItemEffectId
+		8: ShowGameModeInfo
+		9: MenuItemInfoTextId
+		10: PlayerMoney
+		11: SelectedItemRadius
+		12: MenuStateNext
+		13: TeamMoney
+		14: HealingZoneEffectAllyId
+		15: HealingZoneOverTimeId
+		16: HealingZoneEffectEnemyId
+		17: MoneyStorageHealAmount
+		18: ArrayElementIndex
+		19: PlayerMoneyEvent
+		20: isCommander
+		26: AirStrikeChase
+		27: DebugVar
+		28: CameraPos
+		29: CameraMovingDir
+		30: CameraSpeed
+		31: CameraCursorPos
+		32: AirstrikePos
+		33: CurrentGameTime
+}
+
+rule("GLOBAL: BUILT-IN RULES")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Is Game In Progress == True;
+	}
+
+	actions
+	{
+		Disable Built-In Game Mode Completion;
+		Disable Built-In Game Mode Announcer;
+		Disable Built-In Game Mode Scoring;
+		Disable Built-In Game Mode Music;
+	}
+}
+
+disabled rule("--- NOT ALLOWED PLACES, AND RESOURCE POSITIONS --- TURN OFF ALL MAPS THAT YOU NOT PLAY")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+disabled rule("MAP: NECROPOLIS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Necropolis);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 1);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-999.000, -999.000, -999.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-9.043, 1, 0.108));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-47.771, 5, 0));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(4.401, 10, 23.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(4.400, 10, -23.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(28.200, 1, 0));
+	}
+}
+
+disabled rule("MAP: BLACK FOREST")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Current Map, ==, Map(Black Forest)), Compare(Current Map, ==, Map(Black Forest Winter))) == True;
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 15);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(33.786, 4, -25.543));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(36.633, 4, 36.762));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-21.043, 12, 4.965));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-11.602, 13, -18.954));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-11.058, 13, 29.648));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(21.364, 9, 4.966));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(11.463, 17, 5.008));
+	}
+}
+
+disabled rule("MAP: ILIOS RUINS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Ilios Ruins);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 50);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(158.361, 95.905, -160.561));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-104.475, 91.029, -161.025));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(28.382, 57.500, -157.255));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-23.615, 58, -156.602));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-47.046, 60, -179.169));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(28.553, 60, -177.564));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(80.578, 58, -156.593));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(104.234, 60, -181.050));
+	}
+}
+
+disabled rule("MAP: ILIOS LIGHTHOUSE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Ilios Lighthouse);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 50);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(231.925, -15.886, -106.873));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(307.993, -15.837, 75.433));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(357.600, -25.600, -51.202));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(336.433, -25.500, 22.876));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(366.814, -27.500, -3.801));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(332.120, -27.500, -90.772));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(290.228, -25.500, -88.844));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(318.862, -23.500, -35.159));
+	}
+}
+
+disabled rule("MAP: ILIOS WELL")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Ilios Well);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 50);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-130.884, 4.532, -120.108));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-312.234, 4.643, 62.369));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-194.287, 1, -2.224));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-258.006, -4.700, 12.724));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-240.412, 0, 34.973));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-219.168, 0, -27.308));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-157.419, 0, -47.679));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-179.385, -4.700, -66.030));
+	}
+}
+
+rule("MAP: NUMBANI")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Numbani);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-9.856, 4.107, 6.705));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(161.384, -3.706, 54.377));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(233.342, 0, 22.958));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(118.048, -4.000, 10.830));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(183.874, -1.700, -15.350));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(146.641, -4.000, -11.901));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(206.854, -2.000, 22.299));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(139.398, -3.700, 46.205));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(25.705, 4, 56.337));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(54.372, -0.800, -21.466));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(86.102, 1, -0.141));
+		Set Global Variable At Index(ResourcePointArrayPos, 8, Vector(22.216, 0, -5.842));
+	}
+}
+
+disabled rule("MAP: KING'S ROW")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Current Map, ==, Map(King's Row)), Compare(Current Map, ==, Map(King's Row Winter))) == True;
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-173.000, 0, 36.600));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-106.191, -1.664, -48.303));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(-76.482, 0.390, -68.549));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(-2.837, 2.832, 29.757));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-72.071, 0, -21.380));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-12.363, 1, -52.711));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(18.679, 6.028, -37.080));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(12.190, 6, -4.923));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-123.050, 1.100, -14.482));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-129.685, 0.100, 42.109));
+	}
+}
+
+rule("MAP: HOLLYWOOD")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Current Map, ==, Map(Hollywood)), Compare(Current Map, ==, Map(Hollywood Halloween))) == True;
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-12.000, 2, 78));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-33.000, 3, -153.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(4, 3, -144.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(41.500, 3, -46.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-5.000, 1.600, -35.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-51.700, 0, -14.600));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-30.000, 7.700, 14.700));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(28.200, 3, 42.900));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-47.220, 0, 55));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(36.600, 1.600, -79.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-46.800, 9.700, -110.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(-34.500, 1.700, -129.000));
+	}
+}
+
+rule("MAP: WATCHPOINT: GIBRALTAR")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Watchpoint: Gibraltar);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(12, 1.500, -148.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(97, -17.500, 30));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(56, -15.000, 58));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(39.700, -5.000, -53.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(2, -2.000, -96.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(50.600, 0, -105.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(53.200, 1, -139.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(70.960, -2.700, -27.840));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(44.400, 3, 5.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(48.700, 1, 23.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(25.450, -4.800, -73.210));
+	}
+}
+
+disabled rule("MAP: HANAMURA")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Current Map, ==, Map(Hanamura)), Compare(Current Map, ==, Map(Hanamura Winter))) == True;
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-32.250, 1, -100.500));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(79, -2.000, 18));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(80.500, -2.000, -2.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(13.130, 0, -28.240));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(12.800, -1.000, 32));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(31.700, 3, 28.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(59, 2, -28.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-14.200, -1.000, -14.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-11.300, -1.000, -85.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(41.160, -1.000, -66.300));
+	}
+}
+
+disabled rule("MAP: VOLSKAYA INDUSTRIES")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Volskaya Industries);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(19, -5.000, 13));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-7.000, -7.000, 4.300));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(-120.000, -1.000, 21.500));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(-135.400, -2.000, 41.700));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-36.900, -4.000, 72.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-13.860, -4.000, 112.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(28.500, -4.000, 78.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-51.300, 0, 26.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-34.800, -5.000, 17.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-54.700, -3.000, 45.650));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-94.300, -4.000, 75.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(-80.900, 2, 42.650));
+		Set Global Variable At Index(ResourcePointArrayPos, 8, Vector(-94.280, -1.000, 49.240));
+		Set Global Variable At Index(ResourcePointArrayPos, 9, Vector(2, 2, 92));
+	}
+}
+
+rule("MAP: HORIZON LUNAR COLONY")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Horizon Lunar Colony);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(18.400, 9, -4.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-33.000, 5, -162.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(-52.000, 5, -150.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(7, 9, -20.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(39.600, 8, -99.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-45.700, 4.500, -101.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(96.700, 11.800, -67.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(84.600, 6.400, -39.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(57.500, 6, -70.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(57.200, 7, -16.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(0, 6, -93.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(27.330, 12, -58.350));
+		Set Global Variable At Index(ResourcePointArrayPos, 8, Vector(-18.110, 2.600, -125.000));
+	}
+}
+
+disabled rule("MAP: TEMPLE OF ANUBIS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Temple of Anubis);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(7, 0, -28.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-5.000, 4.400, 135));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-45.450, 2.700, 43.450));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(1, 0.800, 31.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-25.400, -2.300, -17.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-40.000, 1.500, 71.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(16, 4.400, 113.700));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-30.000, 3.600, 107));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(11.600, 3.500, 61));
+	}
+}
+
+rule("MAP: BLIZZ WORLD")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Current Map, ==, Map(Blizzard World)), Compare(Current Map, ==, Map(Blizzard World Winter))) == True;
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-81.000, -15.000, 90));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(10, -0.600, -27.600));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(-77.500, 4.200, 175));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(-155.000, 5.550, 100));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 4, Vector(-96.900, -15.000, 85));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-47.500, 0, 78));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(3.250, 6, 85.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-37.000, 5.200, 48));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-28.000, -2.000, 10.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(36.100, 4, 57.100));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-66.000, 0.500, 138));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-114.700, 1.700, 157));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(-122.110, 0, 110.560));
+	}
+}
+
+rule("MAP: DORADO")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Dorado);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(220, 16.800, 42.300));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(181, -6.200, 41.500));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(191, -6.000, 32.500));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(152, -2.000, -13.500));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 4, Vector(-11.800, 6.800, -12.400));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 5, Vector(-14.600, 1.900, 17.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(103.450, 11, 8.650));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(172.700, 19, 48.120));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(122.350, 11, 38.450));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(83.550, 9, -47.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(47.550, 2, 10.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(26.100, 5.100, -41.120));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(73.740, 7, -11.350));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(131.150, 11, 26));
+		Set Global Variable At Index(ResourcePointArrayPos, 8, Vector(189.200, 15, 22.400));
+	}
+}
+
+rule("MAP: EICHENWALDE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Current Map, ==, Map(Eichenwalde)), Compare(Current Map, ==, Map(Eichenwalde Halloween))) == True;
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(127, 12.550, -5.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(97.700, -4.500, -23.300));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(95, 17.300, -110.800));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(-12.200, 4.200, 4.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(52, 9.400, -92.600));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(13.200, 6, -92.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(14.700, 4, -19.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-24.900, 2, -36.310));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(82.860, 12.700, -88.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(97.180, 15.700, -20.580));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(122.600, 10.700, -62.300));
+	}
+}
+
+rule("MAP: HAVANA")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Havana);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-99.120, 7, -69.350));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(163, 12.800, -46.770));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(84, 15.900, -14.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(55.500, -8.500, -63.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(40.150, 5.800, -70.450));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(96.780, 2, -72.550));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(138.600, 5, -18.700));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(107.300, 1.800, -30.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-11.200, 5.800, -79.160));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-15.800, 6, -43.250));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-55.800, 4, -28.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(-35.500, 10, -97.200));
+	}
+}
+
+rule("MAP: JUNKERTOWN")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Junkertown);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-90.000, 5, -95.200));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-86.900, 10.600, -185.200));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(-37.500, -9.250, -129.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(-19.500, -10.000, -115.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 4, Vector(55.800, 12.500, -76.500));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 5, Vector(-115.600, 10.400, -96.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-26.000, 6.300, -90.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(37, 9, -55.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(15, 8, -95.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-5.000, 1.500, -19.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-39.000, 4.600, -33.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-42.600, 4.500, -72.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-55.400, 7.500, -100.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(-65.000, 6, -136.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 8, Vector(-92.800, 5.500, -119.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 9, Vector(-105.000, 12.500, -154.000));
+	}
+}
+
+rule("MAP: RIALTO")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Rialto);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-57.000, 4, -164.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-38.400, -23.500, -122.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(-59.000, -24.500, -127.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 3, Vector(0, -24.000, -78.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 4, Vector(-16.000, -29.000, -78.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 5, Vector(130, 4.200, -21.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(20.450, 1.600, -68.400));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(63.100, 0, -70.600));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(39.950, 1.500, -31.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(79, -1.200, -2.600));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-17.000, -1.200, -33.600));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-81.000, 1.700, -100.500));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-36.700, 1.500, -100.500));
+	}
+}
+
+rule("MAP: ROUTE 66")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Route 66);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-102.000, 8.700, -43.700));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(-61.870, -2.700, -43.200));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 2, Vector(42.800, 0, 67));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-11.100, 3.300, -18.300));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-42.500, 3.300, -7.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-71.350, 10.500, 34));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-90.300, 6.500, 20.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-92.430, 6.500, -23.460));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(56.740, 2.400, 4.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(66.300, 0, 44.200));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(17.300, 2.100, -9.500));
+	}
+}
+
+disabled rule("MAP: PARIS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Current Map == Map(Paris);
+	}
+
+	actions
+	{
+		Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 0, Vector(-110.000, 15, -113.000));
+		Set Global Variable At Index(NotAllowedBuildPlacesPosition, 1, Vector(23, 11, -73.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 0, Vector(-68.000, 12, -16.800));
+		Set Global Variable At Index(ResourcePointArrayPos, 1, Vector(-13.000, 14, -37.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 2, Vector(-15.400, 10, -16.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 3, Vector(-41.600, 12, 30));
+		Set Global Variable At Index(ResourcePointArrayPos, 4, Vector(-54.600, 9, -48.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 5, Vector(-120.230, 10.900, -69.650));
+		Set Global Variable At Index(ResourcePointArrayPos, 6, Vector(-83.000, 13, -102.000));
+		Set Global Variable At Index(ResourcePointArrayPos, 7, Vector(-86.000, 12, -64.250));
+	}
+}
+
+disabled rule("--- INIT EFFECTS (BUILDINGS) AND GLOBAL VARS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL: INIT BUILDING COSTS, START TEAM MONEY, VICTORY MONEY, PLAYER MONEY MAX")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Set Global Variable(MoneyStorageCost, 250);
+		Set Global Variable(SpawnZoneCost, 300);
+		Set Global Variable(HealingZoneCost, 300);
+		Set Global Variable(ExtractorCost, 200);
+		Set Global Variable(Team1Money, 1000);
+		Set Global Variable(Team2Money, 1000);
+		Set Global Variable(VictoryMoney, 5000);
+		Set Global Variable(PlayerMoneyMax, 700);
+	}
+}
+
+rule("GLOBAL: INIT EFFECT RADIUSES, COMMANDER DELAY, SPAWN ZONE TIME, RESPAWNS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Set Global Variable(CommanderDelayMax, 60);
+		Set Global Variable(MoneyStorageRadius, 3);
+		Set Global Variable(SpawnZoneRadius, 1.500);
+		Set Global Variable(HealingZoneRadius, 3);
+		Set Global Variable(ExtractorRadius, 2.300);
+		Set Global Variable(SpawnZoneWavesMax, 4);
+		Set Global Variable(ResourcePointMinDistanceForSpawn, 25);
+	}
+}
+
+rule("GLOBAL: INIT BUILDING POSITIONS AND ARRAY OF BUILDING POSITIONS ( 0-3 TEAM1'S BUILDINGS, 4-6 TEAM2'S BUILDINGS)")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		disabled Set Global Variable(NotAllowedBuildPlacesRadius, 20);
+		Set Global Variable(Team1Build, -1.000);
+		Set Global Variable(Team2Build, -1.000);
+		Set Global Variable(Team1MoneyStoragePos, Vector(-999.000, -999.000, 0));
+		Set Global Variable(Team2MoneyStoragePos, Vector(-999.000, -999.000, 0));
+		Set Global Variable(Team1SpawnZonePos, Vector(0, -999.000, 0));
+		Set Global Variable(Team2SpawnZonePos, Vector(0, -999.000, 0));
+		Set Global Variable(Team1HealingZonePos, Vector(-999.000, -999.000, 0));
+		Set Global Variable(Team2HealingZonePos, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 0, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 1, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 2, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 3, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 4, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 5, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 6, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 7, Vector(-999.000, -999.000, 0));
+	}
+}
+
+rule("GLOBAL: CREATE ALL BUILDING TEXTS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Set Global Variable(Team1MoneyStorageHealth, 100);
+		Set Global Variable(Team2MoneyStorageHealth, 100);
+		Create In-World Text(All Players(All Teams), Custom String("HEALTH: {0}%", Global Variable(Team1MoneyStorageHealth), Null, Null),
+			Add(Global Variable(Team1MoneyStoragePos), Vector(0, 2.500, 0)), 1.200, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("HEALTH: {0}%", Global Variable(Team2MoneyStorageHealth), Null, Null),
+			Add(Global Variable(Team2MoneyStoragePos), Vector(0, 2.500, 0)), 1.200, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+	}
+}
+
+rule("GLOBAL: CREATE GENERAL HUD TEXTS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(All Players(All Teams), Null, Custom String("TEAM BASE WARS V2.2 BY HUKUTA94#2589, LIONARIUS#2731", Null, Null,
+			Null), Null, Right, -999.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(All Players(Team 1), Custom String("ALLY {0}  $  {1} ENEMY", Global Variable(Team1Money), Global Variable(
+			Team2Money), Null), Null, Null, Right, -8.000, Green, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(All Players(Team 2), Custom String("ALLY {1}  $  {0} ENEMY", Global Variable(Team1Money), Global Variable(
+			Team2Money), Null), Null, Null, Right, -8.000, Green, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Null, Null, Custom String("REACH {0}$ FIRST TO WIN", Global Variable(VictoryMoney), Null,
+			Null), Right, -7.000, Green, White, Green, Visible To and String, Default Visibility);
+	}
+}
+
+rule("GLOBAL: VICTORY CONDITION")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Or(Compare(Global Variable(Team1Money), >=, Global Variable(VictoryMoney)), Compare(Global Variable(Team2Money), >=,
+			Global Variable(VictoryMoney))) == True;
+	}
+
+	actions
+	{
+		Skip If(Compare(Global Variable(Team2Money), >=, Global Variable(VictoryMoney)), 2);
+		Declare Team Victory(Team 1);
+		Abort;
+		Declare Team Victory(Team 2);
+	}
+}
+
+disabled rule("--- GAME MODE GAMEPLAY INFO ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL: TEAM BASE WARS MOD INFORMATION")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(All Players(All Teams), Null, Null, Custom String("YOU CAN CARRY MAX {0}$", Global Variable(PlayerMoneyMax), Null,
+			Null), Left, -1.000, White, White, Turquoise, Visible To and String, Default Visibility);
+		Create HUD Text(Filtered Array(All Players(All Teams), Compare(Player Variable(Current Array Element, isCommander), ==, False)),
+			Custom String("DEFAULT PLAYER:
+HOLD F - DROP MONEY
+DEFEND YOUR BASE
+ATTACK ENEMY BASE
+BRING MONEY TO YOUR BASE", Null,
+			Null, Null), Null, Null, Left, -103.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Filtered Array(All Players(All Teams), Compare(Player Variable(Current Array Element, isCommander), ==, True)),
+			Custom String("COMMANDER INFO:
+HOLD 'F' - OPEN SHOP
+BUILD BASE FOR ALLIES
+BUILD EXTRACTOR AND
+MONEY STORAGE", Null, Null,
+			Null), Null, Null, Left, -103.000, White, White, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(Filtered Array(All Players(Team 2), Compare(Current Array Element, !=, Global Variable(Team2CommanderId))),
+			Custom String("DEFAULT PLAYER:
+HOLD 'F' - DROP MONEY
+CAPTURE RESOURCE '$'
+STEAL FROM ENEMY BASE", Null, Null, Null), Null,
+			Null, Left, -103.000, White, White, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(All Players(All Teams), Null, Custom String("1. VICTORY CONDITION: YOUR TEAM MUST REACH {0}$ THE FIRST",
+			Global Variable(VictoryMoney), Null, Null), Null, Left, -101.000, White, Sky Blue, White, Visible To and String,
+			Default Visibility);
+		disabled Create HUD Text(All Players(All Teams), Null, Custom String(
+			"2. COMMANDER
+2.1 HOLD 'CROUCH'+'INTERACT' FOR 3 SEC TO BECOME A COMMANDER
+2.2 HOLD 'INTERACT' FOR 1 SEC TO OPEN BUILDING SHOP",
+			Null, Null, Null), Null, Left, -100.000, White, Orange, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(All Players(All Teams), Null, Custom String("2.3 BUILD BASE FOR YOUR MATES", Null, Null, Null), Null, Left,
+			-99.000, White, Orange, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(All Players(All Teams), Null, Custom String("3. HOW TO GET MONEY FOR YOUR TEAM", Null, Null, Null), Null, Left,
+			-98.000, White, Green, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(All Players(All Teams), Null, Custom String(
+			"3.1 KILL ENEMIES
+3.2 PICKUP MONEY DROP
+3.3 CAPTURE RESOURCE POINT
+3.4 STEAL FROM ENEMY 'MONEY STORAGE'", Null, Null, Null),
+			Null, Left, -97.000, White, Green, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(All Players(All Teams), Null, Custom String("3.5 BRING MONEY TO YOUR 'MONEY STORAGE'", Null, Null, Null), Null,
+			Left, -96.000, White, Green, White, Visible To and String, Default Visibility);
+	}
+}
+
+rule("PLAYER: JOINED TO MATCH, CHANGED TEAM IF PLAYER WAS A COMMANDER")
+{
+	event
+	{
+		Player Joined Match;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Dummy Bot(Event Player) == False;
+	}
+
+	actions
+	{
+		disabled Set Player Variable(Event Player, PlayerMoney, 650);
+		Set Player Variable(Event Player, ShowGameModeInfo, True);
+		Create HUD Text(All Players(Team Of(Event Player)), Null, Null, Custom String("{0} {1}: {2}$", Hero Icon String(Hero Of(
+			Event Player)), Event Player, Player Variable(Event Player, PlayerMoney)), Left, 0, White, White, Turquoise,
+			Visible To and String, Default Visibility);
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 2);
+		Abort If(Compare(Global Variable(Team2CommanderId), !=, Event Player));
+		Set Global Variable(Team2CommanderId, Null);
+		Abort If(Compare(Global Variable(Team1CommanderId), !=, Event Player));
+		Set Global Variable(Team1CommanderId, Null);
+	}
+}
+
+disabled rule("PLAYER: SHOW GAMEPLAY TUTORIAL")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Dummy Bot(Event Player) == False;
+		Has Spawned(Event Player) == True;
+		Player Variable(Event Player, ShowGameModeInfo) == True;
+	}
+
+	actions
+	{
+		Wait(1.200, Ignore Condition);
+		Small Message(Event Player, Custom String("WELCOME TO THE TEAM BASE WARS V2", Null, Null, Null));
+		Wait(3, Ignore Condition);
+		Small Message(Event Player, Custom String("LEARN HOW TO PLAY THIS MOD WITH THIS MINI TUTORIAL", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("AT THE TOP THE CURRENT BALANCE OF TEAMS", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("TO WIN YOUR TEAM MUST REACH {0}$ FIRST", Global Variable(VictoryMoney), Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("EACH TEAM HAS A COMMANDER WHO CAN BUILD A BASE", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("HOLD 'CROUCH'+'INTERACT' FOR 3 SEC TO BECOME A COMMANDER", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("THERE CAN BE ONLY ONE COMMANDER IN A TEAM", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("HOLD 'INTERACT' TO OPEN BUILDING SHOP", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("BUILD BASE FOR YOUR MATES", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("TO GET MONEY: KILL ENEMY, PICKUP MONEY DROP...", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("...STEAL FROM ENEMY BASE, CAPTURE RESOURCE POINT", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("BRING MONEY TO YOUR 'MONEY STORAGE'", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("LOOK AT LEFT CORNER FOR MORE INFO", Null, Null, Null));
+		Wait(3.500, Ignore Condition);
+		Small Message(Event Player, Custom String("GOOD LUCK!", Global Variable(VictoryMoney), Null, Null));
+		Set Player Variable(Event Player, ShowGameModeInfo, False);
+	}
+}
+
+disabled rule("--- BECOMING A COMMANDER ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL TEAM1: COMMANDER ID == NULL")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1CommanderId) == Null;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Global Variable(Team1CommanderInfoTextId));
+		Create HUD Text(All Players(Team 1), Custom String(
+			"HOLD 'CROUCH'+'F' TO BECOME A COMMANDER
+         YOUR TEAM NEEDS A COMMANDER!         ", Null, Null, Null), Null, Null, Top,
+			-9.000, White, White, White, Visible To and String, Default Visibility);
+		Set Global Variable(Team1CommanderInfoTextId, Last Text ID);
+	}
+}
+
+rule("GLOBAL TEAM1: COMMANDER ID != NULL")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1CommanderId) != Null;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Global Variable(Team1CommanderInfoTextId));
+		Create HUD Text(All Players(Team 1), Custom String(
+			"HOLD 'CROUCH'+'F' TO BECOME A COMMANDER
+                COMMANDER: {0} {1}                    ", Hero Icon String(Hero Of(
+			Global Variable(Team1CommanderId))), Global Variable(Team1CommanderId), Null), Null, Null, Top, -9.000, White, White, White,
+			Visible To and String, Default Visibility);
+		Set Global Variable(Team1CommanderInfoTextId, Last Text ID);
+	}
+}
+
+rule("PLAYER TEAM1: TRY TO BECOME A COMMANDER")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 1;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Interact) == True;
+		Is Button Held(Event Player, Crouch) == True;
+		Global Variable(Team1CommanderId) != Event Player;
+	}
+
+	actions
+	{
+		Wait(2, Abort When False);
+		Set Player Variable(Event Player, CurrentGameTime, Total Time Elapsed);
+		Skip If(Compare(Total Time Elapsed, >=, Global Variable(Team1CommanderDelay)), 2);
+		Small Message(Event Player, Custom String("you can become a commander in {0} sec", Round To Integer(Subtract(Global Variable(
+			Team1CommanderDelay), Player Variable(Event Player, CurrentGameTime)), Up), Null, Null));
+		Abort;
+		Set Player Variable(Global Variable(Team1CommanderId), isCommander, False);
+		Set Player Variable(Global Variable(Team1CommanderId), MenuState, -2.000);
+		Wait(0.020, Ignore Condition);
+		Set Global Variable(Team1CommanderId, Event Player);
+		Set Player Variable(Event Player, isCommander, True);
+		Set Global Variable(Team1CommanderDelay, Add(Total Time Elapsed, Global Variable(CommanderDelayMax)));
+		Big Message(All Players(Team Of(Event Player)), Custom String("{0} {1} BECOMING A COMMANDER", Hero Icon String(Hero Of(
+			Event Player)), Event Player, Null));
+	}
+}
+
+rule("GLOBAL TEAM2: COMMANDER ID == NULL")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2CommanderId) == Null;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Global Variable(Team2CommanderInfoTextId));
+		Create HUD Text(All Players(Team 2), Custom String(
+			"HOLD 'CROUCH'+'F' TO BECOME A COMMANDER
+         YOUR TEAM NEEDS A COMMANDER!         ", Null, Null, Null), Null, Null, Top,
+			-9.000, White, White, White, Visible To and String, Default Visibility);
+		Set Global Variable(Team2CommanderInfoTextId, Last Text ID);
+	}
+}
+
+rule("GLOBAL TEAM2: COMMANDER ID != NULL")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2CommanderId) != Null;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Global Variable(Team2CommanderInfoTextId));
+		Create HUD Text(All Players(Team 2), Custom String(
+			"HOLD 'CROUCH'+'F' TO BECOME A COMMANDER
+                COMMANDER: {0} {1}                    ", Hero Icon String(Hero Of(
+			Global Variable(Team2CommanderId))), Global Variable(Team2CommanderId), Null), Null, Null, Top, -9.000, White, White, White,
+			Visible To and String, Default Visibility);
+		Set Global Variable(Team2CommanderInfoTextId, Last Text ID);
+	}
+}
+
+rule("PLAYER TEAM2: TRY TO BECOME A COMMANDER")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 2;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Interact) == True;
+		Is Button Held(Event Player, Crouch) == True;
+		Global Variable(Team2CommanderId) != Event Player;
+	}
+
+	actions
+	{
+		Wait(2, Abort When False);
+		Set Player Variable(Event Player, CurrentGameTime, Total Time Elapsed);
+		Skip If(Compare(Total Time Elapsed, >=, Global Variable(Team2CommanderDelay)), 2);
+		Small Message(Event Player, Custom String("you can become a commander in {0} sec", Subtract(Global Variable(Team2CommanderDelay),
+			Player Variable(Event Player, CurrentGameTime)), Null, Null));
+		Abort;
+		Set Player Variable(Global Variable(Team2CommanderId), isCommander, False);
+		Set Player Variable(Global Variable(Team2CommanderId), MenuState, -2.000);
+		Wait(0.020, Ignore Condition);
+		Set Global Variable(Team2CommanderId, Event Player);
+		Set Player Variable(Event Player, isCommander, True);
+		Set Global Variable(Team2CommanderDelay, Add(Total Time Elapsed, Global Variable(CommanderDelayMax)));
+		Big Message(All Players(Team Of(Event Player)), Custom String("{0} {1} BECOMING A COMMANDER", Hero Icon String(Hero Of(
+			Event Player)), Event Player, Null));
+	}
+}
+
+disabled rule("--- SHOP MENU ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER: MenuState = 0: HOLD \"INTERACT\" (F) TO OPEN SHOP -> MenuState = 1: UPDATE ITEM TEXT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 0;
+		Is Button Held(Event Player, Interact) == True;
+		Is Alive(Event Player) == True;
+		Or(Compare(Global Variable(Team1CommanderId), ==, Event Player), Compare(Global Variable(Team2CommanderId), ==, Event Player))
+			== True;
+	}
+
+	actions
+	{
+		Wait(0.600, Abort When False);
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		Disallow Button(Event Player, Ultimate);
+		Set Primary Fire Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, False);
+		Create HUD Text(Event Player, Custom String(
+			"HOLD 'INTERACT' (F) - CLOSE SHOP
+'ABILITY1' (SHIFT) - PREV ITEM
+'ABILITY2' (E) - NEXT ITEM
+'FIRE' (LEFT MOUSE) - BUY",
+			Null, Null, Null), Null, Null, Top, 1, White, White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuInfoTextId, Last Text ID);
+		Set Player Variable(Event Player, MenuState, 1);
+	}
+}
+
+disabled rule("--- SHOW CURRENT SHOP ITEM ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER: MenuState = 1; ShopItem = 0: MONEY STORAGE -> MenuState = 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 1;
+		Player Variable(Event Player, ShopItem) == 0;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, SelectedItemRadius, Global Variable(MoneyStorageRadius));
+		Destroy Effect(Player Variable(Event Player, SelectedItemEffectId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemInfoTextId));
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 2);
+		Skip If(Compare(Y Component Of(Global Variable(Team1MoneyStoragePos)), !=, -999.000), 4);
+		Skip(1);
+		Skip If(Compare(Y Component Of(Global Variable(Team2MoneyStoragePos)), !=, -999.000), 2);
+		Set Player Variable(Event Player, SelectedItemCost, 0);
+		Skip(1);
+		Set Player Variable(Event Player, SelectedItemCost, Global Variable(MoneyStorageCost));
+		Create HUD Text(Event Player, Custom String("MONEY STORAGE: {0}$", Player Variable(Event Player, SelectedItemCost), Null, Null),
+			Null, Null, Top, 2, Green, White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemTextId, Last Text ID);
+		Create HUD Text(Event Player, Null, Null, Custom String("ALLOW YOUR ALLIES TO PUT MONEY AND GET MONEY FROM 'EXTRACTOR'", Null,
+			Null, Null), Top, 3, White, White, Green, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemInfoTextId, Last Text ID);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Green, Event Player, Global Variable(MoneyStorageRadius),
+			Position and Radius);
+		Set Player Variable(Event Player, SelectedItemEffectId, Last Created Entity);
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 1; ShopItem = 1: SPAWN ZONE -> MenuState = 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 1;
+		Player Variable(Event Player, ShopItem) == 1;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, SelectedItemRadius, Global Variable(SpawnZoneRadius));
+		Destroy Effect(Player Variable(Event Player, SelectedItemEffectId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemInfoTextId));
+		Set Player Variable(Event Player, SelectedItemCost, Global Variable(SpawnZoneCost));
+		Create HUD Text(Event Player, Custom String("SPAWN ZONE: {0}$", Global Variable(SpawnZoneCost), Null, Null), Null, Null, Top, 2,
+			Blue, White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemTextId, Last Text ID);
+		Create HUD Text(Event Player, Null, Null, Custom String("respawns wave of allies {0} times then destroyed", Global Variable(
+			SpawnZoneWavesMax), Null, Null), Top, 3, White, White, Blue, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemInfoTextId, Last Text ID);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Blue, Event Player, Global Variable(SpawnZoneRadius), Position and Radius);
+		Set Player Variable(Event Player, SelectedItemEffectId, Last Created Entity);
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 1; ShopItem = 2: HEALING ZONE -> MenuState = 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 1;
+		Player Variable(Event Player, ShopItem) == 2;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, SelectedItemRadius, Global Variable(HealingZoneRadius));
+		Destroy Effect(Player Variable(Event Player, SelectedItemEffectId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemInfoTextId));
+		Create HUD Text(Event Player, Custom String("HEALING ZONE: {0}$", Global Variable(HealingZoneCost), Null, Null), Null, Null, Top,
+			2, Yellow, White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemTextId, Last Text ID);
+		Create HUD Text(Event Player, Null, Null, Custom String("HEALS YOUR ALLIES INSIDE OF CIRCLE", Null, Null, Null), Top, 3, White,
+			White, Yellow, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemInfoTextId, Last Text ID);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Yellow, Event Player, Global Variable(HealingZoneRadius),
+			Position and Radius);
+		Set Player Variable(Event Player, SelectedItemEffectId, Last Created Entity);
+		Set Player Variable(Event Player, SelectedItemCost, Global Variable(HealingZoneCost));
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 1; ShopItem = 3: EXTRACTOR -> MenuState = 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 1;
+		Player Variable(Event Player, ShopItem) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, SelectedItemRadius, Global Variable(ExtractorRadius));
+		Destroy Effect(Player Variable(Event Player, SelectedItemEffectId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemInfoTextId));
+		Create HUD Text(Event Player, Custom String("EXTRACTOR: {0}$", Global Variable(ExtractorCost), Null, Null), Null, Null, Top, 2,
+			White, White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemTextId, Last Text ID);
+		Create HUD Text(Event Player, Null, Null, Custom String("GETS MONEY (10$/SEC) FROM A RESOURCE", Null, Null, Null), Top, 3, White,
+			White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemInfoTextId, Last Text ID);
+		disabled Create Effect(All Players(Team Of(Event Player)), Ring, White, Event Player, Global Variable(ExtractorRadius),
+			Position and Radius);
+		disabled Set Player Variable(Event Player, SelectedItemEffectId, Last Created Entity);
+		Set Player Variable(Event Player, SelectedItemCost, Global Variable(ExtractorCost));
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 1; ShopItem = 4: AIRSTRIKE -> MenuState = 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 1;
+		Player Variable(Event Player, ShopItem) == 4;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, SelectedItemRadius, 5);
+		Destroy Effect(Player Variable(Event Player, SelectedItemEffectId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemInfoTextId));
+		Create HUD Text(Event Player, Custom String("AIRSTRIKE: 350$", Null, Null, Null), Null, Null, Top, 2, Orange, White, White, String,
+			Default Visibility);
+		Set Player Variable(Event Player, MenuItemTextId, Last Text ID);
+		Create HUD Text(Event Player, Null, Null, Custom String("OPENS PORTAL OF DEATH", Null, Null, Null), Top, 3, White, White, Orange,
+			String, Default Visibility);
+		Set Player Variable(Event Player, MenuItemInfoTextId, Last Text ID);
+		Set Player Variable(Event Player, SelectedItemCost, 350);
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+disabled rule("--- MENU CONTROL ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER: MenuState = 2: PREV ITEM -> MenuState = 1: UPDATE ITEM TEXT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 2;
+		Is Button Held(Event Player, Ability 1) == True;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, ShopItem, Subtract, 1);
+		Skip If(Compare(Player Variable(Event Player, ShopItem), >=, 0), 1);
+		Set Player Variable(Event Player, ShopItem, 4);
+		Set Player Variable(Event Player, MenuState, 1);
+	}
+}
+
+rule("PLAYER: MenuState = 2: NEXT ITEM -> MenuState = 1: UPDATE ITEM TEXT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 2;
+		Is Button Held(Event Player, Ability 2) == True;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, ShopItem, Add, 1);
+		Skip If(Compare(Player Variable(Event Player, ShopItem), <=, 4), 1);
+		Set Player Variable(Event Player, ShopItem, 0);
+		Set Player Variable(Event Player, MenuState, 1);
+	}
+}
+
+rule("PLAYER: MenuState = 2: SELECT ITEM -> FUNCTION: GET TEAM MONEY IN PLAYER'S VAR -> MenuState = 3")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 2;
+		Is Button Held(Event Player, Primary Fire) == True;
+		Is On Ground(Event Player) == True;
+	}
+
+	actions
+	{
+		Skip If(Compare(Player Variable(Event Player, ShopItem), !=, 0), 6);
+		Skip If(Compare(Team Of(Event Player), ==, Team 2), 2);
+		Skip If(Compare(Count Of(Filtered Array(All Living Players(Team 2), Compare(Distance Between(Position Of(Current Array Element),
+			Global Variable(Team1MoneyStoragePos)), <=, Global Variable(MoneyStorageRadius)))), ==, 0), 4);
+		Skip(1);
+		Skip If(Compare(Count Of(Filtered Array(All Living Players(Team 1), Compare(Distance Between(Position Of(Current Array Element),
+			Global Variable(Team2MoneyStoragePos)), <=, Global Variable(MoneyStorageRadius)))), ==, 0), 2);
+		Small Message(Event Player, Custom String("CAN'T REBUILD: YOUR BASE UNDER ATTACK", Null, Null, Null));
+		Abort;
+		Set Player Variable(Event Player, MenuStateNext, 3);
+		Set Player Variable(Event Player, MenuState, -3.000);
+	}
+}
+
+rule("PLAYER: MenuState = 3: CHECK MONEY BEFORE BUY (TRUE)")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+		Player Variable(Event Player, TeamMoney) >= Player Variable(Event Player, SelectedItemCost);
+	}
+
+	actions
+	{
+		Skip If(Compare(Player Variable(Event Player, ShopItem), >, 3), 2);
+		Set Player Variable(Event Player, MenuState, 4);
+		Abort;
+		Set Player Variable(Event Player, MenuState, 10);
+	}
+}
+
+rule("PLAYER: MenuState = 3: CHECK MONEY BEFORE BUY (FALSE)")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Wait(0.100, Abort When False);
+		Small Message(Event Player, Custom String("not enough money", Null, Null, Null));
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 4: CHECK AREA FOR SELECTED BUILDING ( TRUE )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+		Is In Spawn Room(Event Player) == False;
+	}
+
+	actions
+	{
+		Skip If(Compare(Player Variable(Event Player, ShopItem), !=, 3), 11);
+		Skip If(Compare(Distance Between(Position Of(Event Player), Global Variable(ResourcePointCurrentPos)), <, Global Variable(
+			ResourcePointRadius)), 2);
+		Small Message(Event Player, Custom String("EXTRACTOR CAN BE BUILT AT RESOURCE ONLY", Null, Null, Null));
+		Skip(32);
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Null), 2);
+		Set Player Variable(Event Player, MenuState, 6);
+		Abort;
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Team Of(Event Player)), 2);
+		Small Message(Event Player, Custom String("EXTRACTOR IS ALREADY BUILT", Null, Null, Null));
+		Skip(26);
+		Small Message(Event Player, Custom String("ENEMY'S EXTRACTOR MUST BE DESTROYED", Null, Null, Null));
+		Skip(24);
+		Abort If(Compare(Distance Between(Event Player, Ray Cast Hit Position(Event Player, Add(Position Of(Event Player), Multiply(Vector(
+			0, 0.400, 1), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False)), <, Player Variable(
+			Event Player, SelectedItemRadius)));
+		Abort If(Compare(Distance Between(Event Player, Ray Cast Hit Position(Event Player, Add(Position Of(Event Player), Multiply(Vector(
+			0.951, 0.400, 0.309), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False)), <, Player Variable(
+			Event Player, SelectedItemRadius)));
+		Abort If(Compare(Distance Between(Event Player, Ray Cast Hit Position(Event Player, Add(Position Of(Event Player), Multiply(Vector(
+			0.587, 0.400, -0.809), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False)), <, Player Variable(
+			Event Player, SelectedItemRadius)));
+		Abort If(Compare(Distance Between(Event Player, Ray Cast Hit Position(Event Player, Add(Position Of(Event Player), Multiply(Vector(
+			-0.587, 0.400, -0.809), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False)), <, Player Variable(
+			Event Player, SelectedItemRadius)));
+		Abort If(Compare(Distance Between(Event Player, Ray Cast Hit Position(Event Player, Add(Position Of(Event Player), Multiply(Vector(
+			-0.951, 0.400, 0.309), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False)), <, Player Variable(
+			Event Player, SelectedItemRadius)));
+		Abort If(Compare(Distance Between(Add(Position Of(Event Player), Vector(1.500, 0.700, 0)), Ray Cast Hit Position(Add(Position Of(
+			Event Player), Vector(1.500, 0.700, 0)), Add(Position Of(Event Player), Vector(1.500, -3.000, 0)), Null, Event Player, False)),
+			>, 1.500));
+		Abort If(Compare(Distance Between(Add(Position Of(Event Player), Vector(-1.500, 0.700, 0)), Ray Cast Hit Position(Add(Position Of(
+			Event Player), Vector(-1.500, 0.700, 0)), Add(Position Of(Event Player), Vector(-1.500, -3.000, 0)), Null, Event Player,
+			False)), >, 1.500));
+		Abort If(Compare(Distance Between(Add(Position Of(Event Player), Vector(0, 0.700, 1.500)), Ray Cast Hit Position(Add(Position Of(
+			Event Player), Vector(0, 0.700, 1.500)), Add(Position Of(Event Player), Vector(0, -3.000, 1.500)), Null, Event Player, False)),
+			>, 1.500));
+		Abort If(Compare(Distance Between(Add(Position Of(Event Player), Vector(0, 0.700, -1.500)), Ray Cast Hit Position(Add(Position Of(
+			Event Player), Vector(0, 0.700, -1.500)), Add(Position Of(Event Player), Vector(0, -3.000, -1.500)), Null, Event Player,
+			False)), >, 1.500));
+		Skip If(Compare(Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))),
+			Vector(X Component Of(Global Variable(ResourcePointCurrentPos)), 0, Z Component Of(Global Variable(ResourcePointCurrentPos)))),
+			<=, 8), 13);
+		Skip If(Is True For Any(Global Variable(NotAllowedBuildPlacesPosition), Compare(Distance Between(Position Of(Event Player),
+			Current Array Element), <, Global Variable(NotAllowedBuildPlacesRadius))), 10);
+		Skip If(Is True For Any(Global Variable(ArrayBuildingPos), Compare(Distance Between(Position Of(Event Player),
+			Current Array Element), <=, 6)), 7);
+		Play Effect(All Players(All Teams), Debuff Impact Sound, White, Position Of(Event Player), 100);
+		Set Player Variable(Event Player, MenuState, 5);
+		disabled Wait(0.700, Ignore Condition);
+		disabled Modify Player Variable(Event Player, ShopItem, Add, 1);
+		disabled Skip If(Compare(Player Variable(Event Player, ShopItem), <=, 2), 1);
+		disabled Set Player Variable(Event Player, ShopItem, 0);
+		Abort;
+		Small Message(Event Player, Custom String("BAD AREA: OTHER BUILDING TOO CLOSE", Null, Null, Null));
+		Skip(3);
+		Small Message(Event Player, Custom String("BAD AREA: CAN'T BUILD NEAR SPAWN ROOM", Null, Null, Null));
+		Skip(1);
+		Small Message(Event Player, Custom String("BAD AREA: CAN'T BUILD NEAR RESOURCE", Null, Null, Null));
+		Wait(0.200, Ignore Condition);
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 4: CHECK AREA FOR SELECTED BUILDING ( FALSE )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		Wait(0.300, Abort When False);
+		Small Message(Event Player, Custom String("BAD AREA", Null, Null, Null));
+		Set Player Variable(Event Player, MenuState, 2);
+	}
+}
+
+rule("PLAYER: MenuState = 5: BUILD SELECTED BUILDING")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 5;
+	}
+
+	actions
+	{
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 3);
+		Set Global Variable At Index(ArrayBuildingPos, Player Variable(Event Player, ShopItem), Position Of(Event Player));
+		Set Global Variable(Team1Build, Player Variable(Event Player, ShopItem));
+		Skip(2);
+		Set Global Variable At Index(ArrayBuildingPos, Add(4, Player Variable(Event Player, ShopItem)), Position Of(Event Player));
+		Set Global Variable(Team2Build, Player Variable(Event Player, ShopItem));
+		disabled Wait(0.060, Ignore Condition);
+		Set Player Variable(Event Player, MenuState, -4.000);
+	}
+}
+
+rule("PLAYER: MenuState = 6: BUILD EXTRACTOR")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 6;
+	}
+
+	actions
+	{
+		Set Global Variable(ResourcePointTeam, Team Of(Event Player));
+		Set Player Variable(Event Player, MenuState, -4.000);
+	}
+}
+
+disabled rule("--- COMMAND TO GLOBAL: CREATE BUILDING ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL TEAM1: BUILD MONEY STORAGE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1Build) == 0;
+	}
+
+	actions
+	{
+		Set Global Variable(Team1MoneyStorageHealth, 100);
+		Set Global Variable(Team1MoneyStoragePos, Position Of(Global Variable(Team1CommanderId)));
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Team 1), 2);
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Add(Global Variable(ResourcePointCurrentPos), Vector(0, 0, 0)));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Add(Global Variable(Team1MoneyStoragePos), Vector(0, 2.400, 0)));
+		Destroy Icon(Global Variable(Team1MoneyStorageIconId));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 0));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 1));
+		Create Icon(All Players(Team 1), Add(Global Variable(Team1MoneyStoragePos), Vector(0, 3, 0)), Circle, Visible To, Green, True);
+		Set Global Variable(Team1MoneyStorageIconId, Last Created Entity);
+		Create Effect(All Players(Team 1), Sphere, Green, Global Variable(Team1MoneyStoragePos), Global Variable(MoneyStorageRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 0, Last Created Entity);
+		Create Effect(All Players(Team 2), Sphere, Red, Global Variable(Team1MoneyStoragePos), Global Variable(MoneyStorageRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 1, Last Created Entity);
+		Big Message(All Players(Team 1), Custom String("COMMANDER BUILT 'MONEY STORAGE'", Null, Null, Null));
+		Set Global Variable(Team1Build, -1.000);
+	}
+}
+
+rule("GLOBAL TEAM2: BUILD MONEY STORAGE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2Build) == 0;
+	}
+
+	actions
+	{
+		Set Global Variable(Team2MoneyStorageHealth, 100);
+		Set Global Variable(Team2MoneyStoragePos, Position Of(Global Variable(Team2CommanderId)));
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Team 2), 2);
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Add(Global Variable(ResourcePointCurrentPos), Vector(0, 0, 0)));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Add(Global Variable(Team2MoneyStoragePos), Vector(0, 2.400, 0)));
+		Destroy Icon(Global Variable(Team2MoneyStorageIconId));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 0));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 1));
+		Create Icon(All Players(Team 2), Add(Global Variable(Team2MoneyStoragePos), Vector(0, 3, 0)), Circle, Visible To, Green, True);
+		Set Global Variable(Team2MoneyStorageIconId, Last Created Entity);
+		Create Effect(All Players(Team 2), Sphere, Green, Global Variable(Team2MoneyStoragePos), Global Variable(MoneyStorageRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 0, Last Created Entity);
+		Create Effect(All Players(Team 1), Sphere, Red, Global Variable(Team2MoneyStoragePos), Global Variable(MoneyStorageRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 1, Last Created Entity);
+		Big Message(All Players(Team 2), Custom String("COMMANDER BUILT 'MONEY STORAGE'", Null, Null, Null));
+		Set Global Variable(Team2Build, -1.000);
+	}
+}
+
+rule("GLOBAL TEAM1: BUILD SPAWN ZONE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1Build) == 1;
+	}
+
+	actions
+	{
+		Set Global Variable(Team1SpawnZoneWavesLeft, Global Variable(SpawnZoneWavesMax));
+		Set Global Variable(Team1SpawnZonePos, Position Of(Global Variable(Team1CommanderId)));
+		Skip If(Compare(Count Of(All Dead Players(Team 1)), ==, 0), 7);
+		Set Global Variable(Team1SpawnZoneWavePlayers, All Dead Players(Team 1));
+		Respawn(All Dead Players(Team 1));
+		Wait(0.060, Ignore Condition);
+		Teleport(Global Variable(Team1SpawnZoneWavePlayers), Global Variable(Team1SpawnZonePos));
+		Set Status(Global Variable(Team1SpawnZoneWavePlayers), Null, Phased Out, 1.500);
+		Set Player Variable(Global Variable(Team1SpawnZoneWavePlayers), SpawnZoneCanRespawn, False);
+		Modify Global Variable(Team1SpawnZoneWavesLeft, Subtract, 1);
+		Destroy Icon(Global Variable(Team1SpawnZoneIconId));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 2));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 3));
+		Destroy In-World Text(Value In Array(Global Variable(Team1BuildingEffectsIds), 8));
+		Create Icon(All Players(Team 1), Add(Global Variable(Team1SpawnZonePos), Vector(0, 3, 0)), Spiral, Visible To, Blue, True);
+		Set Global Variable(Team1SpawnZoneIconId, Last Created Entity);
+		Create Effect(All Players(Team 1), Light Shaft, Blue, Global Variable(Team1SpawnZonePos), Global Variable(SpawnZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 2, Last Created Entity);
+		Create Effect(All Players(Team 2), Light Shaft, Red, Global Variable(Team1SpawnZonePos), Global Variable(SpawnZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 3, Last Created Entity);
+		Set Player Variable(All Dead Players(Team 1), SpawnZoneCanRespawn, True);
+		Big Message(All Players(Team 1), Custom String("COMMANDER  BUILT 'SPAWN ZONE'", Null, Null, Null));
+		Create In-World Text(All Players(Team 1), Custom String("respawns: {0}", Global Variable(Team1SpawnZoneWavesLeft), Null, Null),
+			Add(Global Variable(Team1SpawnZonePos), Vector(0, 0.500, 0)), 1.200, Do Not Clip, Visible To and String, White,
+			Default Visibility);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 8, Last Text ID);
+		Set Global Variable(Team1Build, -1.000);
+	}
+}
+
+rule("GLOBAL TEAM2: BUILD SPAWN ZONE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2Build) == 1;
+	}
+
+	actions
+	{
+		Set Global Variable(Team2SpawnZoneWavesLeft, Global Variable(SpawnZoneWavesMax));
+		Set Global Variable(Team2SpawnZonePos, Position Of(Global Variable(Team2CommanderId)));
+		Skip If(Compare(Count Of(All Dead Players(Team 2)), ==, 0), 7);
+		Set Global Variable(Team2SpawnZoneWavePlayers, All Dead Players(Team 2));
+		Respawn(All Dead Players(Team 2));
+		Wait(0.060, Ignore Condition);
+		Teleport(Global Variable(Team2SpawnZoneWavePlayers), Global Variable(Team2SpawnZonePos));
+		Set Status(Global Variable(Team1SpawnZoneWavePlayers), Null, Phased Out, 1.500);
+		Set Player Variable(Global Variable(Team2SpawnZoneWavePlayers), SpawnZoneCanRespawn, False);
+		Modify Global Variable(Team2SpawnZoneWavesLeft, Subtract, 1);
+		Destroy Icon(Global Variable(Team2SpawnZoneIconId));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 2));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 3));
+		Destroy In-World Text(Value In Array(Global Variable(Team2BuildingEffectsIds), 8));
+		Create Icon(All Players(Team 2), Add(Global Variable(Team2SpawnZonePos), Vector(0, 3, 0)), Spiral, Visible To, Blue, True);
+		Set Global Variable(Team2SpawnZoneIconId, Last Created Entity);
+		Create Effect(All Players(Team 2), Light Shaft, Blue, Global Variable(Team2SpawnZonePos), Global Variable(SpawnZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 2, Last Created Entity);
+		Create Effect(All Players(Team 1), Light Shaft, Red, Global Variable(Team2SpawnZonePos), Global Variable(SpawnZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 3, Last Created Entity);
+		Set Player Variable(All Dead Players(Team 2), SpawnZoneCanRespawn, True);
+		Big Message(All Players(Team 2), Custom String("COMMANDER  BUILT 'SPAWN ZONE'", Null, Null, Null));
+		Create In-World Text(All Players(Team 2), Custom String("respawns: {0}", Global Variable(Team2SpawnZoneWavesLeft), Null, Null),
+			Add(Global Variable(Team2SpawnZonePos), Vector(0, 0.500, 0)), 1.200, Do Not Clip, Visible To and String, White,
+			Default Visibility);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 8, Last Text ID);
+		Set Global Variable(Team2Build, -1.000);
+	}
+}
+
+rule("GLOBAL TEAM1: BUILD HEALING ZONE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1Build) == 2;
+	}
+
+	actions
+	{
+		Destroy Icon(Global Variable(Team1HealingZoneIconId));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 4));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 5));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 6));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 7));
+		Set Global Variable(Team1HealingZonePos, Position Of(Global Variable(Team1CommanderId)));
+		Create Icon(All Players(Team 1), Add(Global Variable(Team1HealingZonePos), Vector(0, 3, 0)), Plus, Visible To, Yellow, True);
+		Set Global Variable(Team1HealingZoneIconId, Last Created Entity);
+		Create Effect(All Players(Team 1), Ring, Yellow, Global Variable(Team1HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 4, Last Created Entity);
+		Create Effect(All Players(Team 2), Ring, Red, Global Variable(Team1HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 5, Last Created Entity);
+		Create Effect(All Players(Team 1), Sparkles, Yellow, Global Variable(Team1HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 6, Last Created Entity);
+		Create Effect(All Players(Team 2), Sparkles, Red, Global Variable(Team1HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team1BuildingEffectsIds, 7, Last Created Entity);
+		Big Message(All Players(Team 1), Custom String("COMMANDER  BUILT 'HEALING ZONE'", Null, Null, Null));
+		Set Global Variable(Team1Build, -1.000);
+	}
+}
+
+rule("GLOBAL TEAM2: BUILD HEALING ZONE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2Build) == 2;
+	}
+
+	actions
+	{
+		Destroy Icon(Global Variable(Team2HealingZoneIconId));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 4));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 5));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 6));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 7));
+		Set Global Variable(Team2HealingZonePos, Position Of(Global Variable(Team2CommanderId)));
+		Create Icon(All Players(Team 2), Add(Global Variable(Team2HealingZonePos), Vector(0, 3, 0)), Plus, Visible To, Yellow, True);
+		Set Global Variable(Team2HealingZoneIconId, Last Created Entity);
+		Create Effect(All Players(Team 2), Ring, Yellow, Global Variable(Team2HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 4, Last Created Entity);
+		Create Effect(All Players(Team 1), Ring, Red, Global Variable(Team2HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 5, Last Created Entity);
+		Create Effect(All Players(Team 2), Sparkles, Yellow, Global Variable(Team2HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 6, Last Created Entity);
+		Create Effect(All Players(Team 1), Sparkles, Red, Global Variable(Team2HealingZonePos), Global Variable(HealingZoneRadius),
+			Visible To);
+		Set Global Variable At Index(Team2BuildingEffectsIds, 7, Last Created Entity);
+		Big Message(All Players(Team 2), Custom String("COMMANDER  BUILT 'HEALING ZONE'", Null, Null, Null));
+		Set Global Variable(Team2Build, -1.000);
+	}
+}
+
+disabled rule("--- COMMANDER ABILITY - AIR STRIKE ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER: MenuState = 10: START CUSTOM CAMERA, CREATE INFO HUD TEXT -> MenuState = 11")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 10;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Player Variable(Event Player, MenuInfoTextId));
+		Create HUD Text(Event Player, Custom String(
+			"HOLD F - CLOSE SHOP
+SHIFT - SPEED
+JUMP - MOVE UP
+CROUCH - MOVE DOWN
+HOLD LEFT MOUSE - BUY", Null, Null, Null), Null, Null,
+			Top, 1, White, White, White, String, Default Visibility);
+		Set Player Variable(Event Player, MenuInfoTextId, Last Text ID);
+		Set Move Speed(Event Player, 0);
+		Start Camera(Event Player, Player Variable(Event Player, CameraPos), Add(Player Variable(Event Player, CameraPos), Vector(
+			X Component Of(Facing Direction Of(Event Player)), Min(Y Component Of(Facing Direction Of(Event Player)), 0), Z Component Of(
+			Facing Direction Of(Event Player)))), 50);
+		Set Player Variable(Event Player, CameraPos, Eye Position(Event Player));
+		Disallow Button(Event Player, Jump);
+		Disallow Button(Event Player, Crouch);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Orange, Player Variable(Event Player, CameraCursorPos), 5,
+			Position and Radius);
+		Set Player Variable(Event Player, SelectedItemEffectId, Last Created Entity);
+		Set Player Variable(Event Player, MenuState, 11);
+	}
+}
+
+rule("PLAYER: MenuState = 11: LOOP CAMERA FLY")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 11;
+	}
+
+	actions
+	{
+		Wait(0.020, Ignore Condition);
+		Set Player Variable(Event Player, CameraCursorPos, Ray Cast Hit Position(Player Variable(Event Player, CameraPos), Add(
+			Player Variable(Event Player, CameraPos), Multiply(Vector(X Component Of(Facing Direction Of(Event Player)), Min(
+			Y Component Of(Facing Direction Of(Event Player)), 0), Z Component Of(Facing Direction Of(Event Player))), 100)), Null,
+			Event Player, False));
+		Set Player Variable(Event Player, CameraMovingDir, World Vector Of(Throttle Of(Event Player), Event Player, Rotation));
+		Skip If(Not(Is Button Held(Event Player, Jump)), 1);
+		Modify Player Variable(Event Player, CameraMovingDir, Add, Up);
+		Skip If(Not(Is Button Held(Event Player, Crouch)), 1);
+		Modify Player Variable(Event Player, CameraMovingDir, Add, Down);
+		Skip If(Is Button Held(Event Player, Ability 1), 2);
+		Set Player Variable(Event Player, CameraSpeed, 15);
+		Skip(1);
+		Set Player Variable(Event Player, CameraSpeed, 40);
+		Skip If(Compare(Ray Cast Hit Position(Player Variable(Event Player, CameraPos), Add(Player Variable(Event Player, CameraPos),
+			Multiply(Player Variable(Event Player, CameraMovingDir), 2)), Null, Event Player, False), ==, Add(Player Variable(Event Player,
+			CameraPos), Multiply(Player Variable(Event Player, CameraMovingDir), 2))), 1);
+		Modify Player Variable(Event Player, CameraMovingDir, Add, Ray Cast Hit Normal(Player Variable(Event Player, CameraPos), Add(
+			Player Variable(Event Player, CameraPos), Multiply(Player Variable(Event Player, CameraMovingDir), 2)), Null, Event Player,
+			False));
+		Skip If(Compare(Ray Cast Hit Position(Player Variable(Event Player, CameraPos), Add(Player Variable(Event Player, CameraPos),
+			Multiply(Player Variable(Event Player, CameraMovingDir), 2)), Null, Event Player, False), ==, Add(Player Variable(Event Player,
+			CameraPos), Multiply(Player Variable(Event Player, CameraMovingDir), 2))), 1);
+		Modify Player Variable(Event Player, CameraMovingDir, Add, Ray Cast Hit Normal(Player Variable(Event Player, CameraPos), Add(
+			Player Variable(Event Player, CameraPos), Multiply(Player Variable(Event Player, CameraMovingDir), 2)), Null, Event Player,
+			False));
+		Skip If(Compare(Throttle Of(Event Player), ==, Vector(0, 0, 0)), 1);
+		Set Player Variable(Event Player, CameraMovingDir, Normalize(Player Variable(Event Player, CameraMovingDir)));
+		Modify Player Variable(Event Player, CameraPos, Add, Multiply(Player Variable(Event Player, CameraMovingDir), Multiply(
+			Player Variable(Event Player, CameraSpeed), 0.020)));
+		Loop If Condition Is True;
+	}
+}
+
+rule("PLAYER: MenuState = 11: USE AIRSTRIKE -> FUNCTION: GET TEAM MONEY IN PLAYER'S VAR -> MenuState = 12")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 11;
+		Is Button Held(Event Player, Primary Fire) == True;
+	}
+
+	actions
+	{
+		Wait(0.250, Abort When False);
+		Set Player Variable(Event Player, MenuStateNext, 12);
+		Set Player Variable(Event Player, MenuState, -3.000);
+	}
+}
+
+rule("PLAYER: MenuState = 12: CHECK MONEY BEFORE BUY (TRUE) - CREATE BOT -> FUNCTION: CLOSE SHOP -> MenuState = 0")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 12;
+		Or(Compare(Player Variable(Event Player, PlayerMoney), >=, Player Variable(Event Player, SelectedItemCost)), Compare(
+			Player Variable(Event Player, TeamMoney), >=, Player Variable(Event Player, SelectedItemCost))) == True;
+		Count Of(Filtered Array(All Players(Team Of(Event Player)), Compare(Is Dummy Bot(Current Array Element), ==, True))) == 0;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, -4.000);
+		Set Player Variable(Event Player, AirstrikePos, Subtract(Ray Cast Hit Position(Player Variable(Event Player, CameraCursorPos), Add(
+			Player Variable(Event Player, CameraCursorPos), Vector(0, 25, 0)), Null, Event Player, False), Vector(0, 1.500, 0)));
+		Create Effect(All Players(All Teams), Light Shaft, Orange, Player Variable(Event Player, CameraCursorPos), 5, Visible To);
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 4);
+		Set Global Variable(Team1AirstrikeEffectsId, Last Created Entity);
+		Wait(1, Ignore Condition);
+		Destroy Effect(Global Variable(Team1AirstrikeEffectsId));
+		Skip(3);
+		Set Global Variable(Team2AirstrikeEffectsId, Last Created Entity);
+		Wait(1, Ignore Condition);
+		Destroy Effect(Global Variable(Team2AirstrikeEffectsId));
+		Create Dummy Bot(Hero(Pharah), Team Of(Event Player), 5, Player Variable(Event Player, AirstrikePos), Vector(0, 0, 0));
+		Create Effect(All Players(All Teams), Good Aura, Orange, Add(Player Variable(Event Player, AirstrikePos), Vector(0, 0.800, 0)),
+			1.250, Visible To);
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 2);
+		Set Global Variable(Team1AirstrikeEffectsId, Last Created Entity);
+		Skip(1);
+		Set Global Variable(Team2AirstrikeEffectsId, Last Created Entity);
+	}
+}
+
+rule("PLAYER: MenuState = 12: CHECK MONEY BEFORE BUY (FALSE) -> MenuState = 11")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 12;
+	}
+
+	actions
+	{
+		Wait(0.100, Abort When False);
+		Small Message(Event Player, Custom String("not enough money", Null, Null, Null));
+		Set Player Variable(Event Player, MenuState, 11);
+	}
+}
+
+rule("BOT PHARAH: AIRSTRIKE IN PROGRESS")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+		Is Dummy Bot(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 0);
+		Set Damage Dealt(Event Player, 200);
+		Chase Player Variable Over Time(Event Player, AirStrikeChase, 4500, 7, Destination and Duration);
+		Start Facing(Event Player, Direction Towards(Eye Position(Event Player), Add(Eye Position(Event Player), Vector(Sine From Degrees(
+			Player Variable(Event Player, AirStrikeChase)), Divide(-1.000, Tangent From Degrees(Min(Divide(200, Distance Between(
+			Position Of(Event Player), Ray Cast Hit Position(Position Of(Event Player), Add(Position Of(Event Player), Multiply(Down,
+			100)), Null, Event Player, False))), 30))), Cosine From Degrees(Player Variable(Event Player, AirStrikeChase))))), 10000,
+			To World, Direction and Turn Rate);
+		Set Status(Event Player, Null, Phased Out, 9999);
+		Set Invisible(Event Player, All);
+		Wait(0.100, Ignore Condition);
+		Set Ultimate Charge(Event Player, 100);
+		Press Button(Event Player, Ultimate);
+		Wait(3.100, Ignore Condition);
+		Set Ultimate Charge(Event Player, 100);
+		Start Holding Button(Event Player, Ultimate);
+		Wait(3.800, Ignore Condition);
+		Play Effect(All Players(All Teams), Bad Explosion, Orange, Event Player, 6);
+		Set Player Variable(Event Player, AirStrikeChase, 0);
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 2);
+		Destroy Effect(Global Variable(Team1AirstrikeEffectsId));
+		Skip(1);
+		Destroy Effect(Global Variable(Team2AirstrikeEffectsId));
+		Destroy Dummy Bot(Team Of(Event Player), Slot Of(Event Player));
+	}
+}
+
+rule("BOT PHARAH: AIRSTRIKE GOT KILL")
+{
+	event
+	{
+		Player Dealt Final Blow;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Dummy Bot(Event Player) == True;
+	}
+
+	actions
+	{
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 3);
+		Modify Global Variable(Team1Money, Add, 100);
+		Small Message(Global Variable(Team1CommanderId), Custom String("AIRSTRIKE KILL: 100$", Null, Null, Null));
+		Abort;
+		Modify Global Variable(Team2Money, Add, 100);
+		Small Message(Global Variable(Team2CommanderId), Custom String("AIRSTRIKE KILL: 100$", Null, Null, Null));
+	}
+}
+
+disabled rule("BOT PHARAH: DAMAGE EVENT")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Is Dummy Bot(Event Player) == True;
+	}
+
+	actions
+	{
+		Skip If(Compare(Team Of(Event Player), ==, Team 2), 2);
+		Damage(Victim, Global Variable(Team1CommanderId), 30);
+		Skip(1);
+		Damage(Victim, Global Variable(Team2CommanderId), 30);
+	}
+}
+
+disabled rule("--- CLOSE SHOP MENU ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER: HOLD 'INTERACT' (F) OR LMB TO CLOSE THE MENU SHOP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) > 0;
+		Or(Is Button Held(Event Player, Primary Fire), Is Button Held(Event Player, Interact)) == True;
+	}
+
+	actions
+	{
+		Wait(0.700, Abort When False);
+		Set Player Variable(Event Player, MenuStateNext, -1.000);
+		Set Player Variable(Event Player, MenuState, -2.000);
+	}
+}
+
+rule("PLAYER: DEAD WHEN SHOP OPENED")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) != 0;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuStateNext, -1.000);
+		Set Player Variable(Event Player, MenuState, -2.000);
+	}
+}
+
+rule("PLAYER: LEFT MATCH")
+{
+	event
+	{
+		Player Left Match;
+		All;
+		All;
+	}
+
+	actions
+	{
+		Destroy Effect(Player Variable(Event Player, HealingZoneEffectAllyId));
+		Destroy Effect(Player Variable(Event Player, HealingZoneEffectEnemyId));
+		Skip If(Compare(Event Player, !=, Global Variable(Team1CommanderId)), 3);
+		Set Global Variable(Team1CommanderId, Null);
+		Set Global Variable(Team1CommanderDelay, 0);
+		Abort;
+		Skip If(Compare(Event Player, !=, Global Variable(Team2CommanderId)), 1);
+		Set Global Variable(Team2CommanderId, Null);
+		Set Global Variable(Team2CommanderDelay, 0);
+	}
+}
+
+disabled rule("--- MENU FUNCTIONS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("FUNCTION: MenuState = -1 EXIT FROM SHOP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == -1.000;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+		Allow Button(Event Player, Jump);
+		Allow Button(Event Player, Crouch);
+		Set Ability 1 Enabled(Event Player, True);
+		Wait(0.020, Ignore Condition);
+		Set Ability 2 Enabled(Event Player, True);
+		Allow Button(Event Player, Ultimate);
+		Set Primary Fire Enabled(Event Player, True);
+		Wait(0.020, Ignore Condition);
+		Stop Camera(Event Player);
+		Set Secondary Fire Enabled(Event Player, True);
+		Destroy Effect(Player Variable(Event Player, SelectedItemEffectId));
+		Set Player Variable(Event Player, MenuState, 0);
+	}
+}
+
+rule("FUNCTION: MenuState = -2 DESTROY SHOP HUDS")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == -2.000;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Player Variable(Event Player, MenuInfoTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuItemInfoTextId));
+		Set Player Variable(Event Player, MenuState, Player Variable(Event Player, MenuStateNext));
+	}
+}
+
+rule("FUNCTION: MenuState = -3: GET TEAM MONEY TO PLAYER'S VAR")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == -3.000;
+	}
+
+	actions
+	{
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 3);
+		Skip If(Compare(Global Variable(Team1Money), <, Player Variable(Event Player, SelectedItemCost)), 5);
+		Set Player Variable(Event Player, TeamMoney, Global Variable(Team1Money));
+		Skip(4);
+		Skip If(Compare(Global Variable(Team2Money), <, Player Variable(Event Player, SelectedItemCost)), 2);
+		Set Player Variable(Event Player, TeamMoney, Global Variable(Team2Money));
+		Skip(1);
+		Set Player Variable(Event Player, TeamMoney, Player Variable(Event Player, PlayerMoney));
+		disabled Wait(0.030, Ignore Condition);
+		Set Player Variable(Event Player, MenuState, Player Variable(Event Player, MenuStateNext));
+	}
+}
+
+rule("FUNCTION: MenuState = -4: REDUCE MONEY AFTER BUY -> MenuState = -2, -1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == -4.000;
+	}
+
+	actions
+	{
+		Skip If(Compare(Team Of(Event Player), !=, Team 1), 3);
+		Skip If(Compare(Player Variable(Event Player, TeamMoney), !=, Global Variable(Team1Money)), 5);
+		Modify Global Variable(Team1Money, Subtract, Player Variable(Event Player, SelectedItemCost));
+		Skip(4);
+		Skip If(Compare(Player Variable(Event Player, TeamMoney), !=, Global Variable(Team2Money)), 2);
+		Modify Global Variable(Team2Money, Subtract, Player Variable(Event Player, SelectedItemCost));
+		Skip(1);
+		Modify Player Variable(Event Player, PlayerMoney, Subtract, Player Variable(Event Player, SelectedItemCost));
+		disabled Wait(0.030, Ignore Condition);
+		Small Message(Event Player, Custom String("Money spent: {0}$", Player Variable(Event Player, SelectedItemCost), Null, Null));
+		Set Player Variable(Event Player, MenuStateNext, -1.000);
+		Set Player Variable(Event Player, MenuState, -2.000);
+	}
+}
+
+disabled rule("--- MONEY STORAGE MECHANICS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER TEAM1: STEAL FROM ENEMY MONEY STORAGE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 1;
+		All;
+	}
+
+	conditions
+	{
+		disabled Y Component Of(Global Variable(Team2MoneyStoragePos)) != -999.000;
+		Is Alive(Event Player) == True;
+		Hero Of(Event Player) != Hero(Sombra);
+		disabled Distance Between(Position Of(Event Player), Global Variable(Team2MoneyStoragePos)) < Global Variable(MoneyStorageRadius);
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team2MoneyStoragePos)), 0, Z Component Of(Global Variable(Team2MoneyStoragePos))))
+			< Global Variable(MoneyStorageRadius);
+	}
+
+	actions
+	{
+		disabled Abort If(Compare(Is Dead(Event Player), ==, True));
+		disabled Abort If(Compare(Hero Of(Event Player), ==, Hero(Sombra)));
+		Wait(0.100, Abort When False);
+		Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team2MoneyStoragePos)), 0)), >, Global Variable(MoneyStorageRadius)));
+		Abort If Condition Is False;
+		Small Message(All Players(Team 2), Custom String("YOUR BASE IS UNDER ATTACK", Null, Null, Null));
+		Wait(1, Abort When False);
+		Skip If(Compare(Player Variable(Event Player, PlayerMoney), >=, Global Variable(PlayerMoneyMax)), 8);
+		Skip If(Compare(Global Variable(Team2Money), ==, 0), 7);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Min(50, Global Variable(Team2Money)));
+		Skip If(Compare(Add(Player Variable(Event Player, PlayerMoney), Player Variable(Event Player, PlayerMoneyEvent)), <=,
+			Global Variable(PlayerMoneyMax)), 1);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Subtract(Global Variable(PlayerMoneyMax), Player Variable(Event Player,
+			PlayerMoney)));
+		Skip If(Compare(Player Variable(Event Player, PlayerMoneyEvent), ==, 0), 1);
+		Small Message(Event Player, Custom String("MONEY STOLEN: {0}$", Player Variable(Event Player, PlayerMoneyEvent), Null, Null));
+		Modify Player Variable(Event Player, PlayerMoney, Add, Player Variable(Event Player, PlayerMoneyEvent));
+		Modify Global Variable(Team2Money, Subtract, Player Variable(Event Player, PlayerMoneyEvent));
+		Play Effect(All Players(All Teams), Explosion Sound, White, Global Variable(Team2MoneyStoragePos), 80);
+		Wait(0.100, Ignore Condition);
+		Modify Global Variable(Team2MoneyStorageHealth, Subtract, 5);
+		Loop If Condition Is True;
+	}
+}
+
+rule("PLAYER TEAM2: STEAL FROM ENEMY MONEY STORAGE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 2;
+		All;
+	}
+
+	conditions
+	{
+		disabled Global Variable(Team1MoneyStoragePos) != Vector(0, -999.000, 0);
+		Is Alive(Event Player) == True;
+		Hero Of(Event Player) != Hero(Sombra);
+		disabled Distance Between(Position Of(Event Player), Global Variable(Team1MoneyStoragePos)) < Global Variable(MoneyStorageRadius);
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team1MoneyStoragePos)), 0, Z Component Of(Global Variable(Team1MoneyStoragePos))))
+			<= Global Variable(MoneyStorageRadius);
+	}
+
+	actions
+	{
+		disabled Abort If(Compare(Is Dead(Event Player), ==, True));
+		disabled Abort If(Compare(Hero Of(Event Player), ==, Hero(Sombra)));
+		Wait(0.100, Abort When False);
+		Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team1MoneyStoragePos)), 0)), >, Global Variable(MoneyStorageRadius)));
+		Abort If Condition Is False;
+		Small Message(All Players(Team 1), Custom String("YOUR BASE IS UNDER ATTACK", Null, Null, Null));
+		Wait(1, Abort When False);
+		Skip If(Compare(Player Variable(Event Player, PlayerMoney), >=, Global Variable(PlayerMoneyMax)), 8);
+		Skip If(Compare(Global Variable(Team1Money), ==, 0), 7);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Min(50, Global Variable(Team1Money)));
+		Skip If(Compare(Add(Player Variable(Event Player, PlayerMoney), Player Variable(Event Player, PlayerMoneyEvent)), <=,
+			Global Variable(PlayerMoneyMax)), 1);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Subtract(Global Variable(PlayerMoneyMax), Player Variable(Event Player,
+			PlayerMoney)));
+		Skip If(Compare(Player Variable(Event Player, PlayerMoneyEvent), ==, 0), 1);
+		Small Message(Event Player, Custom String("MONEY STOLEN: {0}$", Player Variable(Event Player, PlayerMoneyEvent), Null, Null));
+		Modify Player Variable(Event Player, PlayerMoney, Add, Player Variable(Event Player, PlayerMoneyEvent));
+		Modify Global Variable(Team1Money, Subtract, Player Variable(Event Player, PlayerMoneyEvent));
+		Play Effect(All Players(All Teams), Explosion Sound, White, Global Variable(Team1MoneyStoragePos), 80);
+		Wait(0.100, Ignore Condition);
+		Modify Global Variable(Team1MoneyStorageHealth, Subtract, 5);
+		Loop If Condition Is True;
+	}
+}
+
+rule("PLAYER TEAM1: DELIVERY MONEY IN ALLY MONEY STORAGE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 1;
+		All;
+	}
+
+	conditions
+	{
+		disabled Global Variable(Team1MoneyStoragePos) != Vector(0, -999.000, 0);
+		Is Alive(Event Player) == True;
+		Player Variable(Event Player, PlayerMoney) > 0;
+		disabled Distance Between(Event Player, Global Variable(Team1MoneyStoragePos)) <= Global Variable(MoneyStorageRadius);
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team1MoneyStoragePos)), 0, Z Component Of(Global Variable(Team1MoneyStoragePos))))
+			<= Global Variable(MoneyStorageRadius);
+	}
+
+	actions
+	{
+		Wait(0.100, Abort When False);
+		Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team1MoneyStoragePos)), 0)), >, Global Variable(MoneyStorageRadius)));
+		Abort If Condition Is False;
+		Small Message(Event Player, Custom String("DELIVERY MONEY IN 4 SEC", Null, Null, Null));
+		Wait(4, Abort When False);
+		Abort If(Compare(Is Dead(Event Player), ==, True));
+		Abort If(Compare(Player Variable(Event Player, PlayerMoney), <=, 0));
+		Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team1MoneyStoragePos)), 0)), >, Global Variable(MoneyStorageRadius)));
+		Play Effect(All Players(All Teams), Buff Explosion Sound, White, Global Variable(Team1MoneyStoragePos), 150);
+		Small Message(All Players(Team Of(Event Player)), Custom String("{0} DELIVERED {1}$", Event Player, Player Variable(Event Player,
+			PlayerMoney), Null));
+		Set Player Variable(Event Player, MoneyStorageHealAmount, Round To Integer(Divide(Player Variable(Event Player, PlayerMoney), 20),
+			Down));
+		Wait(0.025, Ignore Condition);
+		Modify Global Variable(Team1MoneyStorageHealth, Add, Player Variable(Event Player, MoneyStorageHealAmount));
+		Small Message(All Players(Team 1), Custom String("{1} increased base's health by {0}%", Player Variable(Event Player,
+			MoneyStorageHealAmount), Event Player, Null));
+		Wait(0.020, Ignore Condition);
+		Modify Global Variable(Team1Money, Add, Player Variable(Event Player, PlayerMoney));
+		Set Player Variable(Event Player, PlayerMoney, 0);
+		Abort If(Compare(Global Variable(Team1MoneyStorageHealth), <=, 100));
+		Set Global Variable(Team1MoneyStorageHealth, 100);
+	}
+}
+
+rule("PLAYER TEAM2: DELIVERY MONEY IN ALLY MONEY STORAGE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 2;
+		All;
+	}
+
+	conditions
+	{
+		disabled Global Variable(Team2MoneyStoragePos) != Vector(0, -999.000, 0);
+		Is Alive(Event Player) == True;
+		Player Variable(Event Player, PlayerMoney) > 0;
+		disabled Distance Between(Event Player, Global Variable(Team2MoneyStoragePos)) <= Global Variable(MoneyStorageRadius);
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team2MoneyStoragePos)), 0, Z Component Of(Global Variable(Team2MoneyStoragePos))))
+			<= Global Variable(MoneyStorageRadius);
+	}
+
+	actions
+	{
+		Wait(0.100, Abort When False);
+		Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team2MoneyStoragePos)), 0)), >, Global Variable(MoneyStorageRadius)));
+		Abort If Condition Is False;
+		Small Message(Event Player, Custom String("DELIVERY MONEY IN 4 SEC", Null, Null, Null));
+		Wait(4, Abort When False);
+		Abort If(Compare(Is Dead(Event Player), ==, True));
+		Abort If(Compare(Player Variable(Event Player, PlayerMoney), <=, 0));
+		Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team2MoneyStoragePos)), 0)), >, Global Variable(MoneyStorageRadius)));
+		Play Effect(All Players(All Teams), Buff Explosion Sound, White, Global Variable(Team2MoneyStoragePos), 150);
+		Small Message(All Players(Team Of(Event Player)), Custom String("{0} DELIVERED {1}$", Event Player, Player Variable(Event Player,
+			PlayerMoney), Null));
+		Set Player Variable(Event Player, MoneyStorageHealAmount, Round To Integer(Divide(Player Variable(Event Player, PlayerMoney), 20),
+			Down));
+		Wait(0.025, Ignore Condition);
+		Modify Global Variable(Team2MoneyStorageHealth, Add, Player Variable(Event Player, MoneyStorageHealAmount));
+		Small Message(All Players(Team 2), Custom String("{1} increased base's health by {0}%", Player Variable(Event Player,
+			MoneyStorageHealAmount), Event Player, Null));
+		Wait(0.020, Ignore Condition);
+		Modify Global Variable(Team2Money, Add, Player Variable(Event Player, PlayerMoney));
+		Set Player Variable(Event Player, PlayerMoney, 0);
+		Abort If(Compare(Global Variable(Team2MoneyStorageHealth), <=, 100));
+		Set Global Variable(Team2MoneyStorageHealth, 100);
+	}
+}
+
+rule("GLOBAL TEAM1: MONEY STORAGE HEALTH = 0%")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1MoneyStorageHealth) <= 0;
+	}
+
+	actions
+	{
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Team 1), 2);
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Vector(0, -999.000, 0));
+		Skip If(Compare(Player Variable(Global Variable(Team1CommanderId), MenuState), !=, 2), 2);
+		Skip If(Compare(Player Variable(Global Variable(Team1CommanderId), ShopItem), !=, 0), 1);
+		Set Player Variable(Global Variable(Team1CommanderId), SelectedItemCost, 0);
+		Play Effect(Global Variable(Team1CommanderId), Ring Explosion Sound, White, Global Variable(Team1CommanderId), 200);
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Global Variable(Team1MoneyStoragePos), 6);
+		Set Global Variable At Index(ArrayBuildingPos, 0, Vector(0, -999.000, 0));
+		Destroy Icon(Global Variable(Team1MoneyStorageIconId));
+		Wait(0.150, Ignore Condition);
+		Set Global Variable(Team1MoneyStorageHealth, 100);
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 0));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 1));
+		Set Global Variable(Team1MoneyStoragePos, Vector(-999.000, -999.000, 0));
+		Set Global Variable At Index(ArrayBuildingPos, 2, Vector(0, -999.000, 0));
+		Destroy Icon(Global Variable(Team1SpawnZoneIconId));
+		disabled Wait(0.150, Ignore Condition);
+		Set Global Variable(Team1SpawnZoneWavesLeft, 0);
+		Destroy Icon(Global Variable(Team1HealingZoneIconId));
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Global Variable(Team1HealingZonePos), 6);
+		Wait(0.100, Ignore Condition);
+		Set Global Variable(Team1HealingZonePos, Vector(-999.000, -999.000, 0));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 4));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 5));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 6));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 7));
+		Set Global Variable(Team1MoneyStorageIconId, Null);
+		Wait(0.025, Ignore Condition);
+		disabled Set Global Variable(Team1SpawnZoneIconId, Null);
+		Set Global Variable(Team1HealingZoneIconId, Null);
+	}
+}
+
+rule("GLOBAL TEAM2: MONEY STORAGE HEALTH = 0%")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2MoneyStorageHealth) <= 0;
+	}
+
+	actions
+	{
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Team 2), 2);
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Vector(0, -999.000, 0));
+		Skip If(Compare(Player Variable(Global Variable(Team2CommanderId), MenuState), !=, 2), 2);
+		Skip If(Compare(Player Variable(Global Variable(Team2CommanderId), ShopItem), !=, 0), 1);
+		Set Player Variable(Global Variable(Team2CommanderId), SelectedItemCost, 0);
+		Play Effect(Global Variable(Team2CommanderId), Ring Explosion Sound, White, Global Variable(Team2CommanderId), 200);
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 0));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 1));
+		Play Effect(All Players(All Teams), Ring Explosion Sound, White, Global Variable(Team2MoneyStoragePos), 200);
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Global Variable(Team2MoneyStoragePos), 6);
+		Set Global Variable At Index(ArrayBuildingPos, 4, Vector(0, -999.000, 0));
+		Destroy Icon(Global Variable(Team2MoneyStorageIconId));
+		Set Global Variable(Team2MoneyStoragePos, Vector(-999.000, -999.000, 0));
+		Wait(0.150, Ignore Condition);
+		Set Global Variable(Team2MoneyStorageHealth, 100);
+		Set Global Variable At Index(ArrayBuildingPos, 6, Vector(0, -999.000, 0));
+		disabled Wait(0.150, Ignore Condition);
+		Set Global Variable(Team2SpawnZoneWavesLeft, 0);
+		Wait(0.100, Ignore Condition);
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 4));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 5));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 6));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 7));
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Global Variable(Team2HealingZonePos), 6);
+		Destroy Icon(Global Variable(Team2HealingZoneIconId));
+		Set Global Variable(Team2HealingZonePos, Vector(0, -999.000, 0));
+		Set Global Variable(Team2MoneyStorageIconId, Null);
+		Wait(0.025, Ignore Condition);
+		disabled Set Global Variable(Team2SpawnZoneIconId, Null);
+		Set Global Variable(Team2HealingZoneIconId, Null);
+	}
+}
+
+disabled rule("--- HEALING ZONE MECHANICS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER TEAM1: INSIDE HEALING RING -> START HEAL OVER TIME")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 1;
+		All;
+	}
+
+	conditions
+	{
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team1HealingZonePos)), 0, Z Component Of(Global Variable(Team1HealingZonePos))))
+			<= Global Variable(HealingZoneRadius);
+		disabled Distance Between(Global Variable(Team1HealingZonePos), Position Of(Event Player)) < Global Variable(HealingZoneRadius);
+	}
+
+	actions
+	{
+		disabled Abort If(Compare(Is Dead(Event Player), ==, True));
+		disabled Wait(0.100, Abort When False);
+		disabled Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team1HealingZonePos)), 0)), >, Global Variable(HealingZoneRadius)));
+		disabled Abort If Condition Is False;
+		Create Beam Effect(All Players(Team 1), Good Beam, Global Variable(Team1HealingZonePos), Event Player, Yellow,
+			Visible To Position and Radius);
+		Set Player Variable(Event Player, HealingZoneEffectAllyId, Last Created Entity);
+		Create Beam Effect(All Players(Team 2), Good Beam, Global Variable(Team1HealingZonePos), Event Player, Red,
+			Visible To Position and Radius);
+		Set Player Variable(Event Player, HealingZoneEffectEnemyId, Last Created Entity);
+		Start Heal Over Time(Event Player, Global Variable(Team1CommanderId), 9999, 30);
+		Set Player Variable(Event Player, HealingZoneOverTimeId, Last Heal Over Time ID);
+	}
+}
+
+rule("PLAYER TEAM2: INSIDE HEALING RING -> START HEAL OVER TIME")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 2;
+		All;
+	}
+
+	conditions
+	{
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team2HealingZonePos)), 0, Z Component Of(Global Variable(Team2HealingZonePos))))
+			<= Global Variable(HealingZoneRadius);
+		disabled Distance Between(Global Variable(Team2HealingZonePos), Position Of(Event Player)) < Global Variable(HealingZoneRadius);
+	}
+
+	actions
+	{
+		disabled Abort If(Compare(Is Dead(Event Player), ==, True));
+		disabled Wait(0.100, Abort When False);
+		disabled Loop If(Compare(Distance Between(Vector(0, Y Component Of(Position Of(Event Player)), 0), Vector(0, Y Component Of(Global Variable(
+			Team2HealingZonePos)), 0)), >, Global Variable(HealingZoneRadius)));
+		disabled Abort If Condition Is False;
+		Create Beam Effect(All Players(Team 2), Good Beam, Global Variable(Team2HealingZonePos), Event Player, Yellow,
+			Visible To Position and Radius);
+		Set Player Variable(Event Player, HealingZoneEffectAllyId, Last Created Entity);
+		Create Beam Effect(All Players(Team 1), Good Beam, Global Variable(Team2HealingZonePos), Event Player, Red,
+			Visible To Position and Radius);
+		Set Player Variable(Event Player, HealingZoneEffectEnemyId, Last Created Entity);
+		Start Heal Over Time(Event Player, Global Variable(Team2CommanderId), 9999, 30);
+		Set Player Variable(Event Player, HealingZoneOverTimeId, Last Heal Over Time ID);
+	}
+}
+
+rule("PLAYER TEAM1: OUTSIDE HEALING RING -> STOP HEAL OVER TIME")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 1;
+		All;
+	}
+
+	conditions
+	{
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team1HealingZonePos)), 0, Z Component Of(Global Variable(Team1HealingZonePos))))
+			> Global Variable(HealingZoneRadius);
+		disabled Distance Between(Global Variable(Team1HealingZonePos), Position Of(Event Player)) > Global Variable(HealingZoneRadius);
+	}
+
+	actions
+	{
+		Destroy Effect(Player Variable(Event Player, HealingZoneEffectAllyId));
+		Destroy Effect(Player Variable(Event Player, HealingZoneEffectEnemyId));
+		Stop Heal Over Time(Player Variable(Event Player, HealingZoneOverTimeId));
+	}
+}
+
+rule("PLAYER TEAM2: OUTSIDE HEALING RING -> STOP HEAL OVER TIME")
+{
+	event
+	{
+		Ongoing - Each Player;
+		Team 2;
+		All;
+	}
+
+	conditions
+	{
+		Distance Between(Vector(X Component Of(Position Of(Event Player)), 0, Z Component Of(Position Of(Event Player))), Vector(
+			X Component Of(Global Variable(Team2HealingZonePos)), 0, Z Component Of(Global Variable(Team2HealingZonePos))))
+			> Global Variable(HealingZoneRadius);
+		disabled Distance Between(Global Variable(Team2HealingZonePos), Position Of(Event Player)) < Global Variable(HealingZoneRadius);
+	}
+
+	actions
+	{
+		Destroy Effect(Player Variable(Event Player, HealingZoneEffectAllyId));
+		Destroy Effect(Player Variable(Event Player, HealingZoneEffectEnemyId));
+		Stop Heal Over Time(Player Variable(Event Player, HealingZoneOverTimeId));
+	}
+}
+
+disabled rule("--- SPAWN ZONE MECHANICS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PLAYER ALL: TELEPORT TO SPAWN ZONE IF JOINED")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+		Is Dummy Bot(Event Player) == False;
+	}
+
+	actions
+	{
+		Skip If(Compare(Team Of(Event Player), ==, Team 2), 3);
+		Abort If(Compare(Y Component Of(Global Variable(Team1SpawnZonePos)), ==, -999.000));
+		Teleport(Event Player, Global Variable(Team1SpawnZonePos));
+		Abort;
+		Abort If(Compare(Y Component Of(Global Variable(Team2SpawnZonePos)), ==, -999.000));
+		Teleport(Event Player, Global Variable(Team2SpawnZonePos));
+	}
+}
+
+rule("PLAYER ALL: WAS RESURECTED BY MERCY")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, SpawnZoneCanRespawn) == True;
+		Is Alive(Event Player) == True;
+		Is In Spawn Room(Event Player) == False;
+	}
+
+	actions
+	{
+		disabled Enable Built-In Game Mode Respawning(Event Player);
+		Set Player Variable(Event Player, SpawnZoneCanRespawn, False);
+		disabled Set Respawn Max Time(Event Player, Add(Global Variable(SpawnZoneTimeMax), 3));
+	}
+}
+
+rule("PLAYER TEAM1: DEAD")
+{
+	event
+	{
+		Player Died;
+		Team 1;
+		All;
+	}
+
+	conditions
+	{
+		Is Dummy Bot(Event Player) == False;
+		Global Variable(Team1SpawnZonePos) != Vector(0, -999.000, 0);
+	}
+
+	actions
+	{
+		disabled Skip If(Compare(Global Variable(Team1SpawnZoneTimeWave), !=, Global Variable(SpawnZoneTimeMax)), 1);
+		disabled Chase Global Variable At Rate(Team1SpawnZoneTimeWave, 0, 1, Destination and Rate);
+		disabled Skip If(Compare(Global Variable(Team1SpawnZoneTimeWave), <, 3), 1);
+		Set Player Variable(Event Player, SpawnZoneCanRespawn, True);
+	}
+}
+
+rule("PLAYER TEAM2: DEAD")
+{
+	event
+	{
+		Player Died;
+		Team 2;
+		All;
+	}
+
+	conditions
+	{
+		Is Dummy Bot(Event Player) == False;
+		Global Variable(Team2SpawnZonePos) != Vector(0, -999.000, 0);
+	}
+
+	actions
+	{
+		disabled Skip If(Compare(Global Variable(Team2SpawnZoneTimeWave), !=, Global Variable(SpawnZoneTimeMax)), 1);
+		disabled Chase Global Variable At Rate(Team2SpawnZoneTimeWave, 0, 1, Destination and Rate);
+		disabled Skip If(Compare(Global Variable(Team2SpawnZoneTimeWave), <, 3), 1);
+		Set Player Variable(Event Player, SpawnZoneCanRespawn, True);
+	}
+}
+
+rule("GLOBAL TEAM1: SPAWN ZONE: RESPAWN WAVE OF DEAD PLAYERS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Count Of(All Dead Players(Team 1)) > 0;
+		Global Variable(Team1SpawnZonePos) != Vector(0, -999.000, 0);
+	}
+
+	actions
+	{
+		Wait(9, Abort When False);
+		Set Global Variable(Team1SpawnZoneWavePlayers, All Dead Players(Team 1));
+		Respawn(All Dead Players(Team 1));
+		Wait(0.060, Ignore Condition);
+		Teleport(Global Variable(Team1SpawnZoneWavePlayers), Global Variable(Team1SpawnZonePos));
+		Set Status(Global Variable(Team1SpawnZoneWavePlayers), Null, Phased Out, 1.500);
+		Set Player Variable(Global Variable(Team1SpawnZoneWavePlayers), SpawnZoneCanRespawn, False);
+		disabled Disable Built-In Game Mode Respawning(Global Variable(Team1SpawnZoneWavePlayers));
+		Modify Global Variable(Team1SpawnZoneWavesLeft, Subtract, 1);
+		disabled Wait(0.050, Ignore Condition);
+		disabled Set Global Variable(Team1SpawnZoneWavePlayers, Empty Array);
+		disabled Skip If(Compare(Count Of(All Dead Players(Team 1)), ==, 0), 3);
+		disabled Set Player Variable(All Dead Players(Team 1), SpawnZoneCanRespawn, True);
+		disabled Set Global Variable(Team1SpawnZoneTimeWave, Global Variable(SpawnZoneTimeMax));
+		disabled Chase Global Variable At Rate(Team1SpawnZoneTimeWave, 0, 1, Destination and Rate);
+	}
+}
+
+rule("GLOBAL TEAM2: SPAWN ZONE: RESPAWN WAVE OF DEAD PLAYERS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Count Of(All Dead Players(Team 2)) > 0;
+		Global Variable(Team2SpawnZonePos) != Vector(0, -999.000, 0);
+	}
+
+	actions
+	{
+		Wait(9, Abort When False);
+		Set Global Variable(Team2SpawnZoneWavePlayers, All Dead Players(Team 2));
+		Respawn(All Dead Players(Team 2));
+		Wait(0.060, Ignore Condition);
+		Teleport(Global Variable(Team2SpawnZoneWavePlayers), Global Variable(Team2SpawnZonePos));
+		Set Status(Global Variable(Team2SpawnZoneWavePlayers), Null, Phased Out, 1.500);
+		Set Player Variable(Global Variable(Team1SpawnZoneWavePlayers), SpawnZoneCanRespawn, False);
+		disabled Disable Built-In Game Mode Respawning(Global Variable(Team2SpawnZoneWavePlayers));
+		Modify Global Variable(Team2SpawnZoneWavesLeft, Subtract, 1);
+		disabled Wait(0.050, Ignore Condition);
+		disabled Set Global Variable(Team2SpawnZoneWavePlayers, Empty Array);
+		disabled Skip If(Compare(Count Of(All Dead Players(Team 2)), ==, 0), 3);
+		disabled Set Player Variable(All Dead Players(Team 2), SpawnZoneCanRespawn, True);
+		disabled Set Global Variable(Team1SpawnZoneTimeWave, Global Variable(SpawnZoneTimeMax));
+		disabled Chase Global Variable At Rate(Team2SpawnZoneTimeWave, 0, 1, Destination and Rate);
+	}
+}
+
+rule("GLOBAL TEAM1: SPAWN ZONE - RESPAWN LEFT = 0")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team1SpawnZoneWavesLeft) == 0;
+	}
+
+	actions
+	{
+		Play Effect(Global Variable(Team1CommanderId), Ring Explosion Sound, White, Global Variable(Team1CommanderId), 200);
+		Big Message(All Players(Team 1), Custom String("'SPAWN ZONE' DESTROED", Null, Null, Null));
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Global Variable(Team1SpawnZonePos), 6);
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 2));
+		Destroy Effect(Value In Array(Global Variable(Team1BuildingEffectsIds), 3));
+		Destroy In-World Text(Value In Array(Global Variable(Team1BuildingEffectsIds), 8));
+		Set Global Variable At Index(ArrayBuildingPos, 1, Vector(0, -999.000, 0));
+		Destroy Icon(Global Variable(Team1SpawnZoneIconId));
+		Set Global Variable(Team1SpawnZonePos, Vector(0, -999.000, 0));
+		Set Player Variable(All Players(Team 1), SpawnZoneCanRespawn, False);
+		disabled Wait(0.050, Ignore Condition);
+		Set Global Variable(Team1SpawnZoneIconId, Null);
+	}
+}
+
+rule("GLOBAL TEAM2: SPAWN ZONE - RESPAWN LEFT = 0")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(Team2SpawnZoneWavesLeft) == 0;
+	}
+
+	actions
+	{
+		Play Effect(Global Variable(Team2CommanderId), Ring Explosion Sound, White, Global Variable(Team2CommanderId), 200);
+		Big Message(All Players(Team 2), Custom String("'SPAWN ZONE' DESTROED", Null, Null, Null));
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Global Variable(Team2SpawnZonePos), 6);
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 2));
+		Destroy Effect(Value In Array(Global Variable(Team2BuildingEffectsIds), 3));
+		Destroy In-World Text(Value In Array(Global Variable(Team2BuildingEffectsIds), 8));
+		Set Global Variable At Index(ArrayBuildingPos, 5, Vector(0, -999.000, 0));
+		Destroy Icon(Global Variable(Team2SpawnZoneIconId));
+		Set Global Variable(Team2SpawnZonePos, Vector(0, -999.000, 0));
+		Set Player Variable(All Players(Team 2), SpawnZoneCanRespawn, False);
+		disabled Wait(0.050, Ignore Condition);
+		Set Global Variable(Team2SpawnZoneIconId, Null);
+	}
+}
+
+disabled rule("--- MONEY DROP ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL: INIT ARRAYS OF POSITIONS, VALUES AND CREATE EFFECTS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Set Global Variable(MoneyDropPositions, Empty Array);
+		Set Global Variable(MoneyDropValues, Empty Array);
+		Set Global Variable(MoneyDropEffectIds, Empty Array);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 0), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 0), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 1), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 1), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 2), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 2), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 3), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 3), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 4), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 4), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 5), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 5), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("{0}$", Value In Array(Global Variable(MoneyDropValues), 6), Null,
+			Null), Value In Array(Global Variable(MoneyDropPositions), 6), 1.300, Clip Against Surfaces, Visible To Position and String,
+			White, Default Visibility);
+	}
+}
+
+rule("PLAYER: DIED WITH MONEY -> MoneyDropNew = Event Player")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, PlayerMoney) > 0;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, PlayerMoneyEvent, Player Variable(Event Player, PlayerMoney));
+		Set Player Variable(Event Player, PlayerMoney, 0);
+		Small Message(Event Player, Custom String("YOU HAVE LOST {0}$", Player Variable(Event Player, PlayerMoneyEvent), Null, Null));
+		Set Global Variable(MoneyDropNew, Event Player);
+		disabled Set Global Variable(MoneyDropNewPos, Add(Nearest Walkable Position(Ray Cast Hit Position(Add(Event Player, World Vector Of(Vector(
+			1, 0, 0), Event Player, Rotation)), Add(Event Player, Multiply(Facing Direction Of(Event Player), Vector(1.500, 0, 1.500))),
+			Null, Event Player, False)), Vector(0, 0.200, 0)));
+		disabled Modify Global Variable(MoneyDropPositions, Append To Array, Global Variable(MoneyDropNewPos));
+		disabled Modify Global Variable(MoneyDropValues, Append To Array, Player Variable(Event Player, PlayerMoneyEvent));
+		disabled Create Effect(All Players(All Teams), Sphere, Green, Global Variable(MoneyDropNewPos), 0.400, Visible To);
+		disabled Modify Global Variable(MoneyDropEffectIds, Append To Array, Last Created Entity);
+	}
+}
+
+rule("PLAYER: HOLD F TO DROP MONEY: MoneyDropNew = Event PLayer")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Interact) == True;
+		Player Variable(Event Player, PlayerMoney) > 0;
+	}
+
+	actions
+	{
+		Wait(1.500, Abort When False);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Player Variable(Event Player, PlayerMoney));
+		Set Player Variable(Event Player, PlayerMoney, 0);
+		Small Message(Event Player, Custom String("YOU HAVE DROPPED: {0}$", Player Variable(Event Player, PlayerMoneyEvent), Null, Null));
+		Set Global Variable(MoneyDropNew, Event Player);
+	}
+}
+
+rule("FUNCTION: MoneyDropNew != NULL: MONEY DROP CREATE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(MoneyDropNew) != Null;
+	}
+
+	actions
+	{
+		Set Global Variable(MoneyDropNewPos, Add(Nearest Walkable Position(Ray Cast Hit Position(Add(Global Variable(MoneyDropNew),
+			World Vector Of(Vector(2, 0, 0), Global Variable(MoneyDropNew), Rotation)), Add(Global Variable(MoneyDropNew), Multiply(
+			Facing Direction Of(Global Variable(MoneyDropNew)), Vector(2, 0, 2))), Null, Global Variable(MoneyDropNew), False)), Vector(0,
+			0.200, 0)));
+		Modify Global Variable(MoneyDropPositions, Append To Array, Global Variable(MoneyDropNewPos));
+		Modify Global Variable(MoneyDropValues, Append To Array, Player Variable(Global Variable(MoneyDropNew), PlayerMoneyEvent));
+		Create Effect(All Players(All Teams), Sphere, Green, Global Variable(MoneyDropNewPos), 0.400, Visible To);
+		Modify Global Variable(MoneyDropEffectIds, Append To Array, Last Created Entity);
+		Set Global Variable(MoneyDropNew, Null);
+		Abort If(Compare(Count Of(Global Variable(MoneyDropPositions)), <=, 7));
+		Modify Global Variable(MoneyDropPositions, Remove From Array By Index, 0);
+		Modify Global Variable(MoneyDropValues, Remove From Array By Index, 0);
+		Destroy Effect(Value In Array(Global Variable(MoneyDropEffectIds), 0));
+		Modify Global Variable(MoneyDropEffectIds, Remove From Array By Index, 0);
+	}
+}
+
+rule("PLAYER: ADD MONEY FOR KILL")
+{
+	event
+	{
+		Player Dealt Final Blow;
+		All;
+		All;
+	}
+
+	actions
+	{
+		Skip If(Compare(70, >, Subtract(Global Variable(PlayerMoneyMax), Player Variable(Event Player, PlayerMoney))), 2);
+		Set Player Variable(Event Player, PlayerMoneyEvent, 70);
+		Skip(1);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Subtract(Global Variable(PlayerMoneyMax), Player Variable(Event Player,
+			PlayerMoney)));
+		Abort If(Compare(Player Variable(Event Player, PlayerMoneyEvent), ==, 0));
+		Modify Player Variable(Event Player, PlayerMoney, Add, Player Variable(Event Player, PlayerMoneyEvent));
+		Small Message(Event Player, Custom String("MONEY FOR KILL: {0}$", Player Variable(Event Player, PlayerMoneyEvent), Null, Null));
+	}
+}
+
+rule("PLAYER: PICKUP MONEY DROP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Alive(Event Player) == True;
+		Is True For Any(Global Variable(MoneyDropPositions), Compare(Distance Between(Position Of(Event Player), Current Array Element),
+			<=, 1.300)) == True;
+		disabled Is True For Any(Global Variable(MoneyDropPositions), Compare(Distance Between(Vector(X Component Of(Position Of(Event Player)), 0,
+			Z Component Of(Position Of(Event Player))), Vector(X Component Of(Current Array Element), 0, Z Component Of(
+			Current Array Element))), <=, 1.300)) == True;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, ArrayElementIndex, Index Of Array Value(Global Variable(MoneyDropPositions), Value In Array(
+			Filtered Array(Global Variable(MoneyDropPositions), Compare(Distance Between(Current Array Element, Position Of(Event Player)),
+			<=, 1.300)), 0)));
+		disabled Abort If(Compare(Player Variable(Event Player, ArrayElementIndex), <, 0));
+		Skip If(Compare(Add(Player Variable(Event Player, PlayerMoney), Value In Array(Global Variable(MoneyDropValues), Player Variable(
+			Event Player, ArrayElementIndex))), >, Global Variable(PlayerMoneyMax)), 6);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Value In Array(Global Variable(MoneyDropValues), Player Variable(Event Player,
+			ArrayElementIndex)));
+		Destroy Effect(Value In Array(Global Variable(MoneyDropEffectIds), Player Variable(Event Player, ArrayElementIndex)));
+		Modify Global Variable(MoneyDropEffectIds, Remove From Array By Index, Player Variable(Event Player, ArrayElementIndex));
+		Modify Global Variable(MoneyDropValues, Remove From Array By Index, Player Variable(Event Player, ArrayElementIndex));
+		Modify Global Variable(MoneyDropPositions, Remove From Array By Index, Player Variable(Event Player, ArrayElementIndex));
+		Skip(6);
+		Skip If(Compare(Player Variable(Event Player, PlayerMoney), >=, Global Variable(PlayerMoneyMax)), 3);
+		Set Player Variable(Event Player, PlayerMoneyEvent, Subtract(Global Variable(PlayerMoneyMax), Player Variable(Event Player,
+			PlayerMoney)));
+		Modify Global Variable At Index(MoneyDropValues, Player Variable(Event Player, ArrayElementIndex), Subtract, Player Variable(
+			Event Player, PlayerMoneyEvent));
+		Skip(2);
+		Small Message(Event Player, Custom String("YOU CAN'T COLLECT MONEY MORE", Null, Null, Null));
+		Abort;
+		Play Effect(All Players(All Teams), Buff Explosion Sound, White, Position Of(Event Player), 100);
+		Play Effect(All Players(All Teams), Good Explosion, Green, Position Of(Event Player), 2);
+		Modify Player Variable(Event Player, PlayerMoney, Add, Player Variable(Event Player, PlayerMoneyEvent));
+		Small Message(Event Player, Custom String("YOU HAVE COLLECTED {0}$", Player Variable(Event Player, PlayerMoneyEvent), Null, Null));
+	}
+}
+
+disabled rule("--- RESOURCE MECHANICS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL: INIT RESOURCE POINT")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create Effect(All Players(All Teams), Sphere, White, Add(Global Variable(ResourcePointCurrentPos), Vector(0, 1.500, 0)), 0.350,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Add(Value In Array(Global Variable(ResourcePointBeamEffectStart), 0), Vector(
+			0, 1.500, 0)), Add(Value In Array(Global Variable(ResourcePointBeamEffectEnd), 0), Vector(0, 0.500, 0)), Green,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Add(Value In Array(Global Variable(ResourcePointBeamEffectStart), 1), Vector(
+			0, 1.500, 0)), Add(Value In Array(Global Variable(ResourcePointBeamEffectEnd), 1), Vector(0, 0.500, 0)), Green,
+			Visible To Position and Radius);
+		Create Effect(All Players(Global Variable(ResourcePointTeam)), Orb, Green, Add(Global Variable(ResourcePointCurrentPos), Vector(0,
+			1.500, 0)), 0.300, Visible To Position and Radius);
+		Create Effect(All Players(Opposite Team Of(Global Variable(ResourcePointTeam))), Orb, Red, Add(Global Variable(
+			ResourcePointCurrentPos), Vector(0, 1.500, 0)), 0.300, Visible To Position and Radius);
+		Create In-World Text(All Players(Global Variable(ResourcePointTeam)), Custom String("$", Null, Null, Null), Add(Global Variable(
+			ResourcePointCurrentPos), Vector(0, 3, 0)), 2.200, Do Not Clip, Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(Opposite Team Of(Global Variable(ResourcePointTeam))), Custom String("$", Null, Null, Null), Add(
+			Global Variable(ResourcePointCurrentPos), Vector(0, 3, 0)), 2.200, Do Not Clip, Visible To Position and String, Red,
+			Default Visibility);
+		Set Global Variable(ResourcePointRadius, 3.300);
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 0, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 0, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Vector(0, -999.000, 0));
+		Create Effect(All Players(All Teams), Ring, White, Global Variable(ResourcePointCurrentPos), Global Variable(ResourcePointRadius),
+			Visible To Position and Radius);
+		Create In-World Text(All Players(All Teams), Custom String("?", Null, Null, Null), Add(Global Variable(ResourcePointCurrentPos),
+			Vector(0, 3, 0)), 3.500, Do Not Clip, Visible To Position and String, White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("$", Null, Null, Null), Add(Global Variable(ResourcePointCurrentPos),
+			Vector(0, 3, 0)), 2.200, Do Not Clip, Visible To Position and String, White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Global Variable(ResourcePointAmount), Add(Global Variable(ResourcePointCurrentPos),
+			Vector(0, -0.500, 0)), 1.100, Do Not Clip, Visible To Position and String, White, Default Visibility);
+		Create In-World Text(All Players(All Teams), Custom String("STAY HERE FOR 4 SEC 
+       TO DESTROY", Null, Null, Null), Add(
+			Global Variable(ResourcePointCurrentPos), Vector(0, 1.200, 0)), 2.200, Do Not Clip, Visible To Position and String, White,
+			Default Visibility);
+		Set Global Variable At Index(ResourcePointEffectsId, 0, Last Text ID);
+		Set Global Variable(ResourcePointCurrentPos, Value In Array(Global Variable(ResourcePointArrayPos), 0));
+		Set Global Variable(ResourcePointLastPos, Global Variable(ResourcePointCurrentPos));
+		Set Global Variable(ResourcePointAmount, 1000);
+		Set Global Variable(ResourcePointArrayPos, Randomized Array(Global Variable(ResourcePointArrayPos)));
+	}
+}
+
+rule("GLOBAL: CREATE EXTRACTOR'S EFFECTS AND TEXTS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointTeam) != Null;
+	}
+
+	actions
+	{
+		Play Effect(All Players(All Teams), Debuff Impact Sound, White, Global Variable(ResourcePointCurrentPos), 100);
+		Destroy In-World Text(Value In Array(Global Variable(ResourcePointEffectsId), 0));
+		Create In-World Text(All Players(Opposite Team Of(Global Variable(ResourcePointTeam))), Custom String(
+			"STAY HERE FOR 5 SEC 
+       TO DESTROY", Null, Null, Null), Add(Global Variable(ResourcePointCurrentPos), Vector(0, 1.200,
+			0)), 1.100, Do Not Clip, Visible To and String, White, Default Visibility);
+		Set Global Variable At Index(ResourcePointEffectsId, 0, Last Text ID);
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 0, Add(Global Variable(ResourcePointCurrentPos), Vector(0, -5.000,
+			-2.500)));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 0, Add(Global Variable(ResourcePointCurrentPos), Vector(0, 1.200, 0)));
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Team 1), 3);
+		Abort If(Compare(Y Component Of(Global Variable(Team1MoneyStoragePos)), ==, -999.000));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Add(Global Variable(Team1MoneyStoragePos), Vector(0, 2.400, 0)));
+		Skip(2);
+		Abort If(Compare(Y Component Of(Global Variable(Team2MoneyStoragePos)), ==, -999.000));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Add(Global Variable(Team2MoneyStoragePos), Vector(0, 2.400, 0)));
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Add(Global Variable(ResourcePointCurrentPos), Vector(0, 0, 0)));
+	}
+}
+
+rule("GLOBAL TEAM1: RESOURCE EXTRACTOR LOOP")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointTeam) == Team 1;
+		Y Component Of(Global Variable(Team1MoneyStoragePos)) != -999.000;
+	}
+
+	actions
+	{
+		Wait(1, Abort When False);
+		Modify Global Variable(Team1Money, Add, 10);
+		Modify Global Variable(ResourcePointAmount, Subtract, 10);
+		Loop If Condition Is True;
+	}
+}
+
+rule("GLOBAL TEAM2: RESOURCE EXTRACTOR LOOP")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointTeam) == Team 2;
+		Y Component Of(Global Variable(Team2MoneyStoragePos)) != -999.000;
+	}
+
+	actions
+	{
+		Wait(1, Abort When False);
+		Modify Global Variable(Team2Money, Add, 10);
+		Modify Global Variable(ResourcePointAmount, Subtract, 10);
+		Loop If Condition Is True;
+	}
+}
+
+rule("GLOBAL TEAM1: DESTROYING ENEMY EXTRACTOR")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointTeam) == Team 2;
+		disabled Is True For Any(All Living Players(Team 1), Compare(Distance Between(Global Variable(Team2ExtractorPos), Position Of(
+			Current Array Element)), <, Global Variable(ExtractorRadius))) == True;
+		Is True For Any(Filtered Array(All Living Players(Team 1), Compare(Hero Of(Current Array Element), !=, Hero(Sombra))), Compare(
+			Distance Between(Global Variable(ResourcePointCurrentPos), Position Of(Current Array Element)), <, Global Variable(
+			ResourcePointRadius))) == True;
+	}
+
+	actions
+	{
+		Big Message(All Players(Team 2), Custom String("extractor is under attack", Null, Null, Null));
+		Small Message(All Players(Team 2), Custom String("extractor is under attack", Null, Null, Null));
+		Wait(5, Abort When False);
+		Set Global Variable(ResourcePointTeam, Null);
+	}
+}
+
+rule("GLOBAL TEAM2: DESTROYING ENEMY EXTRACTOR")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointTeam) == Team 1;
+		disabled Is True For Any(All Living Players(Team 2), Compare(Distance Between(Global Variable(Team1ExtractorPos), Position Of(
+			Current Array Element)), <, Global Variable(ExtractorRadius))) == True;
+		Is True For Any(Filtered Array(All Living Players(Team 2), Compare(Hero Of(Current Array Element), !=, Hero(Sombra))), Compare(
+			Distance Between(Global Variable(ResourcePointCurrentPos), Position Of(Current Array Element)), <, Global Variable(
+			ResourcePointRadius))) == True;
+	}
+
+	actions
+	{
+		Big Message(All Players(Team 1), Custom String("extractor is under attack", Null, Null, Null));
+		Small Message(All Players(Team 1), Custom String("extractor is under attack", Null, Null, Null));
+		Wait(5, Abort When False);
+		Set Global Variable(ResourcePointTeam, Null);
+	}
+}
+
+rule("GLOBAL: RESOURCE AMOUNT = 0")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointAmount) == 0;
+	}
+
+	actions
+	{
+		Modify Global Variable(ResourcePointIterator, Add, 1);
+		Skip If(Compare(Global Variable(ResourcePointIterator), !=, Count Of(Global Variable(ResourcePointArrayPos))), 1);
+		Set Global Variable(ResourcePointIterator, 0);
+		Set Global Variable(ResourcePointCurrentPos, Value In Array(Global Variable(ResourcePointArrayPos), Global Variable(
+			ResourcePointIterator)));
+		Wait(0.016, Ignore Condition);
+		Loop If(Compare(Global Variable(ResourcePointCurrentPos), ==, Global Variable(ResourcePointLastPos)));
+		Loop If(Is True For Any(Global Variable(ArrayBuildingPos), Compare(Distance Between(Global Variable(ResourcePointCurrentPos),
+			Current Array Element), <, Global Variable(ResourcePointMinDistanceForSpawn))));
+		Set Global Variable(ResourcePointLastPos, Global Variable(ResourcePointCurrentPos));
+		Set Global Variable(ResourcePointTeam, Null);
+		Set Global Variable(ResourcePointAmount, 1000);
+	}
+}
+
+rule("GLOBAL: DESTROY EXTRACTOR'S EFFECTS AND TEXTS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global Variable(ResourcePointTeam) == Null;
+	}
+
+	actions
+	{
+		Play Effect(All Players(All Teams), Bad Explosion, Orange, Global Variable(ResourcePointCurrentPos), 15);
+		Play Effect(All Players(All Teams), Ring Explosion Sound, White, Global Variable(ResourcePointCurrentPos), 130);
+		Destroy In-World Text(Value In Array(Global Variable(ResourcePointEffectsId), 0));
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 0, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 0, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectStart, 1, Vector(0, -999.000, 0));
+		Set Global Variable At Index(ResourcePointBeamEffectEnd, 1, Vector(0, -999.000, 0));
+		disabled Wait(0.016, Ignore Condition);
+		Skip If(Compare(Global Variable(ResourcePointAmount), >, Add(Global Variable(ExtractorCost), 100)), 3);
+		Set Global Variable(ResourcePointCurrentPos, Vector(-999.000, -999.000, 0));
+		Set Global Variable(ResourcePointAmount, 0);
+		Abort;
+		Create In-World Text(All Players(All Teams), Custom String("BUILD EXTRACTOR HERE", Null, Null, Null), Add(Global Variable(
+			ResourcePointCurrentPos), Vector(0, 1.200, 0)), 1.100, Do Not Clip, Visible To and String, White, Default Visibility);
+		Set Global Variable At Index(ResourcePointEffectsId, 0, Last Text ID);
+	}
+}
+
+disabled rule("DEBUG: PRESS ULT FOR MONEY")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Ultimate) == True;
+	}
+
+	actions
+	{
+		Wait(0.100, Ignore Condition);
+		Modify Player Variable(Event Player, PlayerMoney, Add, 100);
+	}
+}
+
+disabled rule("DEBUG: AIRSTRIKE EFFECT RADIUS")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Create Effect(All Players(Team Of(Event Player)), Sphere, Red, Player Variable(Event Player, CameraPos), Global Variable(
+			NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create HUD Text(Event Player, Player Variable(Event Player, CameraPos), Null, Null, Left, 0, White, White, White,
+			Visible To and String, Default Visibility);
+		disabled Create HUD Text(Event Player, Custom String("YOU ARE IN NOT ALLOWED PLACE: {0}", Is True For Any(Global Variable(
+			NotAllowedBuildPlacesPosition), Compare(Distance Between(Current Array Element, Position Of(Event Player)), <=,
+			Global Variable(NotAllowedBuildPlacesRadius))), Null, Null), Null, Null, Left, -105.000, White, White, White,
+			Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("CAMERA: {0}", Player Variable(Event Player, CameraPos), Null, Null), Null, Null, Left,
+			-151.000, White, White, White, Visible To and String, Default Visibility);
+	}
+}
+
+disabled rule("DEBUG: RESOURCE POSITIONS VISUALS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 0), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 1), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 2), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 3), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 4), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 5), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 6), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 7), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 8), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create Effect(All Players(All Teams), Ring, White, Value In Array(Global Variable(ResourcePointArrayPos), 9), Global Variable(
+			ResourcePointRadius), Visible To);
+		Create In-World Text(All Players(All Teams), 0, Value In Array(Global Variable(ResourcePointArrayPos), 0), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 1, Value In Array(Global Variable(ResourcePointArrayPos), 1), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 2, Value In Array(Global Variable(ResourcePointArrayPos), 2), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 3, Value In Array(Global Variable(ResourcePointArrayPos), 3), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 4, Value In Array(Global Variable(ResourcePointArrayPos), 4), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 5, Value In Array(Global Variable(ResourcePointArrayPos), 5), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 6, Value In Array(Global Variable(ResourcePointArrayPos), 6), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 7, Value In Array(Global Variable(ResourcePointArrayPos), 7), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 8, Value In Array(Global Variable(ResourcePointArrayPos), 8), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 9, Value In Array(Global Variable(ResourcePointArrayPos), 9), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create HUD Text(All Players(All Teams), Custom String("RESOURCE: {0}", Global Variable(ResourcePointCurrentPos), Null, Null), Null,
+			Null, Left, 0, White, White, White, Visible To and String, Default Visibility);
+	}
+}
+
+disabled rule("DEBUG: NOT ALLOWED PLACES FOR BUILDING VISUALS")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		disabled Create Effect(All Players(All Teams), Light Shaft, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 0),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		disabled Create Effect(All Players(All Teams), Light Shaft, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 1),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		disabled Create Effect(All Players(All Teams), Light Shaft, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 2),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		disabled Create Effect(All Players(All Teams), Light Shaft, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 3),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		disabled Create Effect(All Players(All Teams), Light Shaft, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 4),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		disabled Create Effect(All Players(All Teams), Light Shaft, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 5),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create In-World Text(All Players(All Teams), 0, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 0), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 1, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 1), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 2, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 2), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 3, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 3), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 4, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 4), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create In-World Text(All Players(All Teams), 5, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 5), 2, Do Not Clip,
+			Visible To Position and String, Green, Default Visibility);
+		Create Effect(All Players(All Teams), Sphere, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 0),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create Effect(All Players(All Teams), Sphere, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 1),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create Effect(All Players(All Teams), Sphere, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 2),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create Effect(All Players(All Teams), Sphere, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 3),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create Effect(All Players(All Teams), Sphere, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 4),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+		Create Effect(All Players(All Teams), Sphere, White, Value In Array(Global Variable(NotAllowedBuildPlacesPosition), 5),
+			Global Variable(NotAllowedBuildPlacesRadius), Visible To Position and Radius);
+	}
+}
+
+disabled rule("DEBUG: SERVER PERFORMANCE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(All Players(All Teams), Null, Null, Custom String("server load: {0}%", Server Load, Null, Null), Left, -100.000,
+			White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Null, Null, Custom String("server load average: {0}%", Server Load Average, Null, Null),
+			Left, -100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Null, Null, Custom String("server load peak: {0}%", Server Load Peak, Null, Null), Left,
+			-100.000, White, White, White, Visible To and String, Default Visibility);
+	}
+}
+
+disabled rule("DEBUG: PLACEMENT BUILDING VISUALS")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Event Player, Ray Cast Hit Position(Event Player, Add(Event Player,
+			Multiply(Vector(0, 0.400, 1), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False), White,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Event Player, Ray Cast Hit Position(Event Player, Add(Event Player,
+			Multiply(Vector(0.951, 0.400, 0.309), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False), White,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Event Player, Ray Cast Hit Position(Event Player, Add(Event Player,
+			Multiply(Vector(0.587, 0.400, -0.809), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False), White,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Event Player, Ray Cast Hit Position(Event Player, Add(Event Player,
+			Multiply(Vector(-0.587, 0.400, -0.809), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False), White,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Event Player, Ray Cast Hit Position(Event Player, Add(Event Player,
+			Multiply(Vector(-0.951, 0.400, 0.309), Player Variable(Event Player, SelectedItemRadius))), Null, Event Player, False), White,
+			Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Add(Position Of(Event Player), Vector(1.500, 0.700, 0)), Add(Position Of(
+			Event Player), Vector(1.500, -3.000, 0)), Aqua, Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Add(Position Of(Event Player), Vector(-1.500, 0.700, 0)), Add(Position Of(
+			Event Player), Vector(-1.500, -3.000, 0)), Aqua, Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Add(Position Of(Event Player), Vector(0, 0.700, 1.500)), Add(Position Of(
+			Event Player), Vector(0, -3.000, 1.500)), Aqua, Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Add(Position Of(Event Player), Vector(0, 0.700, -1.500)), Add(Position Of(
+			Event Player), Vector(0, -3.000, -1.500)), Aqua, Visible To Position and Radius);
+		Create HUD Text(Event Player, Custom String("VERTICAL RAY1 DIST: {0}", Distance Between(Add(Position Of(Event Player), Vector(
+			1.500, 0.700, 0)), Ray Cast Hit Position(Add(Position Of(Event Player), Vector(1.500, 0.700, 0)), Add(Position Of(
+			Event Player), Vector(1.500, -5.000, 0)), Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White,
+			White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("VERTICAL RAY2 DIST: {0}", Distance Between(Add(Position Of(Event Player), Vector(
+			-1.500, 0.700, 0)), Ray Cast Hit Position(Add(Position Of(Event Player), Vector(-1.500, 0.700, 0)), Add(Position Of(
+			Event Player), Vector(1.500, -5.000, 0)), Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White,
+			White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("VERTICAL RAY3 DIST: {0}", Distance Between(Add(Position Of(Event Player), Vector(0,
+			0.700, 1.500)), Ray Cast Hit Position(Add(Position Of(Event Player), Vector(0, 0.700, 1.500)), Add(Position Of(Event Player),
+			Vector(1.500, -5.000, 0)), Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White,
+			Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("VERTICAL RAY4 DIST: {0}", Distance Between(Add(Position Of(Event Player), Vector(0,
+			0.700, -1.500)), Ray Cast Hit Position(Add(Position Of(Event Player), Vector(0, 0.700, -1.500)), Add(Position Of(Event Player),
+			Vector(1.500, -5.000, 0)), Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White,
+			Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("HORIZONTAL RAY1 DIST: {0}", Distance Between(Event Player, Ray Cast Hit Position(
+			Event Player, Add(Event Player, Multiply(Vector(0, 0.400, 1), Player Variable(Event Player, SelectedItemRadius))), Null,
+			Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White, Visible To and String,
+			Default Visibility);
+		Create HUD Text(Event Player, Custom String("HORIZONTAL RAY2 DIST: {0}", Distance Between(Event Player, Ray Cast Hit Position(
+			Event Player, Add(Event Player, Multiply(Vector(0.951, 0.400, 0.309), Player Variable(Event Player, SelectedItemRadius))),
+			Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White, Visible To and String,
+			Default Visibility);
+		Create HUD Text(Event Player, Custom String("HORIZONTAL RAY3 DIST: {0}", Distance Between(Event Player, Ray Cast Hit Position(
+			Event Player, Add(Event Player, Multiply(Vector(0.587, 0.400, -0.809), Player Variable(Event Player, SelectedItemRadius))),
+			Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White, Visible To and String,
+			Default Visibility);
+		Create HUD Text(Event Player, Custom String("HORIZONTAL RAY4 DIST: {0}", Distance Between(Event Player, Ray Cast Hit Position(
+			Event Player, Add(Event Player, Multiply(Vector(-0.587, 0.400, -0.809), Player Variable(Event Player, SelectedItemRadius))),
+			Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White, Visible To and String,
+			Default Visibility);
+		Create HUD Text(Event Player, Custom String("HORIZONTAL RAY5 DIST: {0}", Distance Between(Event Player, Ray Cast Hit Position(
+			Event Player, Add(Event Player, Multiply(Vector(-0.951, 0.400, 0.309), Player Variable(Event Player, SelectedItemRadius))),
+			Null, Event Player, False)), Null, Null), Null, Null, Right, -50.000, White, White, White, Visible To and String,
+			Default Visibility);
+	}
+}
+
+disabled rule("DEGUD: SPAWN DUMMY BOT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Interact) == True;
+	}
+
+	actions
+	{
+		Create Dummy Bot(Hero(Ana), Team Of(Event Player), -1.000, Position Of(Event Player), Vector(0, 0, 0));
+		Create Dummy Bot(Hero(Ana), Opposite Team Of(Team Of(Event Player)), -1.000, Position Of(Event Player), Vector(0, 0, 0));
+		Teleport(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element)), Position Of(Event Player));
+	}
+}
+
+disabled rule("DEBUG: DISTANCE FROM SPAWN AND PLAYER'S POS")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, DebugVar, Position Of(Event Player));
+		Create HUD Text(All Players(All Teams), Custom String("{0} {2}: {1}m", Event Player, Distance Between(Player Variable(Event Player,
+			DebugVar), Position Of(Event Player)), Position Of(Event Player)), Null, Null, Left, -111.000, White, White, White,
+			Visible To and String, Default Visibility);
+	}
+}
+
+disabled rule("DEBUG: PRESS ULT TO DAMAGE BASES AND SET TEAM MONEY")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Host Player == Event Player;
+		Is Button Held(Event Player, Ultimate) == True;
+	}
+
+	actions
+	{
+		Modify Global Variable(Team1MoneyStorageHealth, Subtract, 25);
+		Modify Global Variable(Team2MoneyStorageHealth, Subtract, 25);
+		Set Global Variable(Team1Money, 3000);
+		Set Global Variable(Team2Money, 3000);
+	}
+}
+
+disabled rule("DEBUG: PRESS ULT TO CREATE/DESTROY EXTRACTOR")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Host Player == Event Player;
+		Is Button Held(Event Player, Ultimate) == True;
+	}
+
+	actions
+	{
+		Skip If(Compare(Global Variable(ResourcePointTeam), !=, Null), 2);
+		Set Global Variable(ResourcePointTeam, Team Of(Event Player));
+		Abort;
+		Set Global Variable(ResourcePointTeam, Null);
+	}
+}
+
+disabled rule("DEBUG: PRESS ULT TO RESPAWN RESOURCE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Host Player == Event Player;
+		Is Button Held(Event Player, Ultimate) == True;
+	}
+
+	actions
+	{
+		Destroy In-World Text(Value In Array(Global Variable(ResourcePointEffectsId), 0));
+		Set Global Variable(ResourcePointAmount, 0);
+	}
+}
+
+rule("--- START FORCING SPAWN IN LAST ROOM FOR TEAM 1 --- !!! THESE RULES MUST BE LAST !!!")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Wait(1, Ignore Condition);
+		Start Forcing Spawn Room(Team 1, 1);
+		Wait(1, Ignore Condition);
+		Start Forcing Spawn Room(Team 1, 2);
+	}
+}
+
+disabled rule("waitting")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Is Waiting For Players == True;
+	}
+
+	actions
+	{
+		Set Objective Description(All Players(All Teams), Custom String("REACH {0}$ FIRST TO WIN", Global Variable(VictoryMoney), Null,
+			Null), Visible To and String);
+	}
+}
+
+disabled rule("assembling")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Is Assembling Heroes == True;
+	}
+
+	actions
+	{
+		Set Match Time(5);
+	}
+}
+
+disabled rule("setup")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Is In Setup == True;
+	}
+
+	actions
+	{
+		Set Match Time(0);
+	}
+}
+
+disabled rule("progress")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Is Game In Progress == True;
+	}
+
+	actions
+	{
+		Set Match Time(10000);
+		Pause Match Time;
+		Set Objective Description(All Players(All Teams), Custom String("REACH {0}$ FIRST TO WIN", Global Variable(VictoryMoney), Null,
+			Null), Visible To and String);
+	}
+}

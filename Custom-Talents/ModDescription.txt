@@ -1,0 +1,3 @@
+Castom Talents Mod by HuKuTa94#2589. 
+Hold 'INTERACT' (Default: F) to select talent for hero. 
+More fun!

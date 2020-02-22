@@ -1,0 +1,4599 @@
+variables
+{
+	global:
+		4: Team1Damage
+		5: Team2Damage
+
+	player:
+		0: TalentVar1
+		1: TalentVar2
+		2: TalentEffectId
+		3: IconId
+		4: DamageDealtCurrent
+		5: Speed
+		7: MenuState
+		8: TalentCurrent
+		9: DamageEventCurrent
+		10: TalentShop
+		11: CurrentArrayElement
+		12: PlayerTalentIconTextId
+		14: MenuTextInfoId
+		15: MenuTalentTextId
+		16: MenuTalentInfoTextId
+		17: MenuMaxTalents
+		18: Hero
+		19: SoldierBoostFieldEffectId
+		20: TalentVar3
+		21: TalentVar4
+		22: SigmaBarrierPushFlag
+		23: SigmaBarrierPushPlayers
+		24: AnaMedicBadEffectId
+		25: AnaMedicBadEffectTime
+		26: AnaMedicGoodEffectId
+		27: AnaMedicGoodEffectTime
+		28: LucioBoopBuffFlag
+		29: LucioBoopBuffTime
+}
+
+subroutines
+{
+	0: OpenTalentMenu
+	2: CloseTalentMenu
+	3: ResetAllAbilitiesAndTalents
+}
+
+disabled rule("")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GLOBAL: ASSEMBLING PHASE")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Is Assembling Heroes == True;
+		disabled Current Game Mode == Game Mode(Deathmatch);
+	}
+
+	actions
+	{
+		Set Match Time(10);
+	}
+}
+
+disabled rule("DEBUG: SLOW MO")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Host Player == Event Player;
+		Or(Compare(Is Button Held(Event Player, Interact), ==, True), Compare(Is Button Held(Event Player, Ultimate), ==, True)) == True;
+	}
+
+	actions
+	{
+		If(Compare(Is Button Held(Event Player, Ultimate), ==, True));
+			Set Slow Motion(10);
+		Else If(Compare(Is Button Held(Event Player, Interact), ==, True));
+			Set Slow Motion(100);
+		End;
+	}
+}
+
+disabled rule("DEBUG: INPUT INFO")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	actions
+	{
+		Create HUD Text(Event Player, Custom String("ABILITY 1 {0}", Is Using Ability 1(Event Player), Null, Null), Null, Null, Right,
+			-100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("ABILITY 2 {0}", Is Using Ability 2(Event Player), Null, Null), Null, Null, Right,
+			-100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("ULTING {0}", Is Using Ultimate(Event Player), Null, Null), Null, Null, Right,
+			-100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("PRIMARY FIRE {0}", Is Firing Primary(Event Player), Null, Null), Null, Null, Right,
+			-100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("SECONDARY FIRE {0}", Is Firing Secondary(Event Player), Null, Null), Null, Null,
+			Right, -100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("THROTTLE {0}", Throttle Of(Event Player), Null, Null), Null, Null, Right, -100.000,
+			White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("SPEED {0}", Speed Of(Event Player), Null, Null), Null, Null, Right, -100.000, White,
+			White, White, Visible To and String, Default Visibility);
+		disabled Create HUD Text(Event Player, Custom String("HORIZ ANGLE: {0}", Horizontal Facing Angle Of(Event Player), Null, Null), Null, Null,
+			Right, -100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("facing: {0}", Facing Direction Of(Event Player), Null, Null), Null, Null, Right,
+			-100.000, White, White, White, Visible To and String, Default Visibility);
+		Create HUD Text(Event Player, Custom String("VERTICAL SPEED 1 {0}", Vertical Speed Of(Event Player), Null, Null), Null, Null,
+			Right, -100.000, White, White, White, Visible To and String, Default Visibility);
+	}
+}
+
+disabled rule("DEBUG: CREATE BOT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		disabled Is Button Held(Event Player, Ultimate) == True;
+		Host Player == Event Player;
+	}
+
+	actions
+	{
+		disabled Set Status(Event Player, Null, Invincible, 9999);
+		Create Dummy Bot(Hero(Soldier: 76), Team Of(Event Player), -1.000, Position Of(Event Player), Vector(0, 0, 0));
+		Create Dummy Bot(Hero(Soldier: 76), Opposite Team Of(Team Of(Event Player)), -1.000, Position Of(Event Player), Vector(0, 0, 0));
+		disabled Wait(3, Ignore Condition);
+		disabled Start Holding Button(All Players(All Teams), Ability 2);
+		disabled Teleport(All Players(All Teams), Position Of(Event Player));
+		disabled Damage(All Players(All Teams), Null, 50);
+		disabled Create Dummy Bot(Hero(Soldier: 76), Team Of(Event Player), 3, Vector(-9.000, 0, 0), Vector(0, 0, 0));
+		disabled Create Dummy Bot(Hero(Lucio), Team Of(Event Player), 4, Position Of(Event Player), Vector(0, 0, 0));
+		disabled Create Dummy Bot(Hero(Ana), Team Of(Event Player), 5, Vector(9, 0, 0), Vector(0, 0, 0));
+	}
+}
+
+disabled rule("DEBUG: MAX ULTIMATE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Crouch) == True;
+	}
+
+	actions
+	{
+		Set Ultimate Charge(Event Player, 100);
+	}
+}
+
+disabled rule("")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	actions
+	{
+		Create Effect(All Players(All Teams), Sphere, White, Add(Position Of(Event Player), Multiply(Vector(X Component Of(
+			Facing Direction Of(Event Player)), 0, Z Component Of(Facing Direction Of(Event Player))), 3)), 4,
+			Visible To Position and Radius);
+		Create HUD Text(Event Player, Is Using Ability 1(Event Player), Null, Null, Left, 0, White, White, White, Visible To and String,
+			Default Visibility);
+	}
+}
+
+disabled rule("DEBUG: CHECK LOOP 'FOR VAR'")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Melee) == True;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, TalentVar2, Players Within Radius(Position Of(Event Player), 6, All Teams, Off));
+		Modify Player Variable(Event Player, TalentVar2, Remove From Array By Value, Event Player);
+		For Player Variable(Event Player, TalentVar1, 0, Count Of(Player Variable(Event Player, AnaMedicBadEffectTime)), 1);
+			Apply Impulse(Value In Array(Player Variable(Event Player, TalentVar2), Player Variable(Event Player, TalentVar1)),
+				Direction Towards(Position Of(Event Player), Eye Position(Value In Array(Player Variable(Event Player, TalentVar2),
+				Player Variable(Event Player, TalentVar1)))), 10, To World, Cancel Contrary Motion);
+		End;
+	}
+}
+
+rule("GLOBAL: GENERAL INFO")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(All Players(All Teams), Null, Null, Custom String("CUSTOM TALENTS V0.5 BY HUKUTA94#2589", Null, Null, Null), Right,
+			-999.000, White, White, White, Visible To and String, Default Visibility);
+		If(Compare(Or(Compare(Current Game Mode, ==, Game Mode(Deathmatch)), Compare(Current Game Mode, ==, Game Mode(Team Deathmatch))),
+			==, True));
+			Create HUD Text(All Players(All Teams), Custom String("HOLD 'INTERACT' (DEFAULT: F) FOR 1 SEC TO OPEN TALENTS MENU", Null, Null,
+				Null), Null, Null, Top, -10.000, White, White, White, Visible To and String, Default Visibility);
+		Else;
+			Create HUD Text(All Players(All Teams), Custom String("HOLD 'INTERACT' (DEFAULT: F) IN SPAWN ROOM TO OPEN TALENTS MENU", Null,
+				Null, Null), Null, Null, Top, -10.000, White, White, White, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+disabled rule("--- TALENT MENU ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("SUBROUTINE: OPEN TALENT MENU")
+{
+	event
+	{
+		Subroutine;
+		OpenTalentMenu;
+	}
+
+	actions
+	{
+		Create HUD Text(Event Player, Custom String(
+			"TALENT MENU OF {0}
+'ABILITY1' (SHIFT) - PREV TALENT
+'ABILITY2' (E) - NEXT TALENT
+'INTERACT' (F) - SELECT TALENT", Hero Of(
+			Event Player), Null, Null), Null, Null, Top, 1, Blue, White, White, Visible To and String, Default Visibility);
+		Set Player Variable(Event Player, MenuTextInfoId, Last Text ID);
+		"Disable some buttons in all game modes"
+		Disallow Button(Event Player, Melee);
+		Disallow Button(Event Player, Ability 1);
+		Disallow Button(Event Player, Ability 2);
+		Disallow Button(Event Player, Ultimate);
+		Disallow Button(Event Player, Primary Fire);
+		Disallow Button(Event Player, Secondary Fire);
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 0));
+			Set Player Variable(Event Player, TalentShop, 1);
+		Else;
+			Set Player Variable(Event Player, TalentShop, Player Variable(Event Player, TalentCurrent));
+		End;
+		Set Player Variable(Event Player, MenuState, 3);
+	}
+}
+
+rule("SUBROUTINE: CLOSE TALENT MENU")
+{
+	event
+	{
+		Subroutine;
+		CloseTalentMenu;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 0);
+		"KocTbIJIb #2 - The subroutine was called by PLAYER DIED event"
+		disabled Skip If(Compare(Is Dead(Event Player), ==, True), 1);
+		"HUD icon ID of player"
+		disabled Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Allow Button(Event Player, Primary Fire);
+		Allow Button(Event Player, Secondary Fire);
+		Allow Button(Event Player, Ability 1);
+		Allow Button(Event Player, Ability 2);
+		Allow Button(Event Player, Ultimate);
+		Allow Button(Event Player, Melee);
+		Abort If(Compare(Player Variable(Event Player, MenuTextInfoId), ==, 0));
+		Destroy HUD Text(Player Variable(Event Player, MenuTextInfoId));
+		Destroy HUD Text(Player Variable(Event Player, MenuTalentTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuTalentInfoTextId));
+	}
+}
+
+rule("SUBROUTINE: RESET ALL ABILITIES AND TALENTS")
+{
+	event
+	{
+		Subroutine;
+		ResetAllAbilitiesAndTalents;
+	}
+
+	actions
+	{
+		"The first spawn INIT ( KocTbIJIb )"
+		Skip If(Compare(Player Variable(Event Player, PlayerTalentIconTextId), ==, Null), 1);
+		"Destroy prev icon of player"
+		Destroy HUD Text(Player Variable(Event Player, PlayerTalentIconTextId));
+		"Destroy widow's railgun icon"
+		Destroy Icon(Player Variable(Event Player, IconId));
+		"Reset damage"
+		Set Damage Dealt(Event Player, 100);
+		Set Player Variable(Event Player, DamageDealtCurrent, 100);
+		"Reset Max health"
+		Set Max Health(Event Player, 100);
+		"Hero's abilities"
+		Set Primary Fire Enabled(Event Player, True);
+		Set Secondary Fire Enabled(Event Player, True);
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+		Set Ultimate Ability Enabled(Event Player, True);
+		"Hero's healing and damage"
+		Set Healing Received(Event Player, 100);
+		Set Healing Dealt(Event Player, 100);
+		Set Damage Received(Event Player, 100);
+		"Herp's physics"
+		Set Move Speed(Event Player, 100);
+		Set Gravity(Event Player, 100);
+		"Projectiles"
+		Set Projectile Speed(Event Player, 100);
+		Set Projectile Gravity(Event Player, 100);
+		"Remove all effects of previous talent"
+		If(Compare(Count Of(Player Variable(Event Player, TalentEffectId)), >, 0));
+			For Player Variable(Event Player, TalentVar4, 0, Count Of(Player Variable(Event Player, TalentEffectId)), 1);
+				Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), Player Variable(Event Player, TalentVar4)));
+			End;
+			Set Player Variable(Event Player, TalentEffectId, Empty Array);
+		End;
+	}
+}
+
+rule("PLAYER ALL: SWAP HERO")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+		Hero Of(Event Player) != Player Variable(Event Player, Hero);
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, Hero, Hero Of(Event Player));
+		disabled Destroy HUD Text(Player Variable(Event Player, PlayerTalentIconTextId));
+		Wait(0.016, Ignore Condition);
+		Call Subroutine(ResetAllAbilitiesAndTalents);
+		Set Player Variable(Event Player, TalentCurrent, 1);
+		Set Player Variable(Event Player, MenuState, 4);
+	}
+}
+
+rule("PLAYER ALL: MenuState = 0: OPEN THE TALENT MENU")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Interact) == True;
+		Player Variable(Event Player, MenuState) == 0;
+		disabled Is Alive(Event Player) == True;
+		disabled Or(Compare(Current Game Mode, ==, Game Mode(Deathmatch)), Compare(Current Game Mode, ==, Game Mode(Team Deathmatch))) == True;
+	}
+
+	actions
+	{
+		Wait(0.600, Abort When False);
+		If(Compare(Or(Compare(Current Game Mode, ==, Game Mode(Deathmatch)), Compare(Current Game Mode, ==, Game Mode(Team Deathmatch))),
+			==, True));
+			Skip(2);
+		Else;
+			If(Compare(Is In Spawn Room(Event Player), ==, True));
+				Call Subroutine(OpenTalentMenu);
+			End;
+		End;
+	}
+}
+
+rule("PLAYER ALL: MenuState = 1: WAITING FOR UNPRESS 'INTERACT' BUTTON")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 1;
+		Is Button Held(Event Player, Interact) == False;
+		Is Button Held(Event Player, Ability 1) == False;
+		Is Button Held(Event Player, Ability 2) == False;
+	}
+
+	actions
+	{
+		"Show talent list"
+		Set Player Variable(Event Player, MenuState, 2);
+		"Text ID of talent description"
+		Set Player Variable(Event Player, MenuTalentInfoTextId, Last Text ID);
+	}
+}
+
+rule("PLAYER ALL: MenuState = 2: PREV TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 2;
+		Is Button Held(Event Player, Ability 1) == True;
+		Player Variable(Event Player, MenuMaxTalents) > 1;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, TalentShop, Subtract, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), <, 1));
+			Set Player Variable(Event Player, TalentShop, Player Variable(Event Player, MenuMaxTalents));
+		End;
+		Destroy HUD Text(Player Variable(Event Player, MenuTalentTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuTalentInfoTextId));
+		Set Player Variable(Event Player, MenuState, 3);
+	}
+}
+
+rule("PLAYER ALL: MenuState = 2: NEXT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 2;
+		Is Button Held(Event Player, Ability 2) == True;
+		Player Variable(Event Player, MenuMaxTalents) > 1;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, TalentShop, Add, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), >, Player Variable(Event Player, MenuMaxTalents)));
+			Set Player Variable(Event Player, TalentShop, 1);
+		End;
+		Destroy HUD Text(Player Variable(Event Player, MenuTalentTextId));
+		Destroy HUD Text(Player Variable(Event Player, MenuTalentInfoTextId));
+		Set Player Variable(Event Player, MenuState, 3);
+	}
+}
+
+rule("PLAYER ALL: MenuState = 2: SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 2;
+		Is Button Held(Event Player, Interact) == True;
+		Is Button Held(Event Player, Ability 1) == False;
+		Is Button Held(Event Player, Ability 2) == False;
+	}
+
+	actions
+	{
+		Play Effect(All Players(All Teams), Buff Impact Sound, White, Event Player, 80);
+		Small Message(Event Player, Custom String("YOU HAVE CHOSEN THE TALENT! ", Null, Null, Null));
+		Set Player Variable(Event Player, TalentCurrent, Player Variable(Event Player, TalentShop));
+		Set Player Variable(Event Player, MenuState, 4);
+		Call Subroutine(ResetAllAbilitiesAndTalents);
+		disabled Destroy HUD Text(Player Variable(Event Player, PlayerTalentIconTextId));
+	}
+}
+
+rule("PLAYER ALL: MenuState = 2: OTHER MODES - CLOSE TALENT MENU")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Current Game Mode != Game Mode(Deathmatch);
+		Current Game Mode != Game Mode(Team Deathmatch);
+		Is In Spawn Room(Event Player) == False;
+		Player Variable(Event Player, MenuState) == 2;
+	}
+
+	actions
+	{
+		Call Subroutine(CloseTalentMenu);
+		Set Player Variable(Event Player, MenuState, 0);
+	}
+}
+
+disabled rule("--- GENJI TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("GENJI: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 3);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(": I DON'T NEED HEALING :", Null, Null, Null), Null, Null, Top, 2, Green, White, White,
+				Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("DASHING INTO YOUR ENEMIES HEALS YOU BY 15% OF ENEMY'S MAX HEALTH", Null,
+				Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":               IMMUNE               :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU ARE IMMUNE FOR STUN AND SLEEP", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			Create HUD Text(Event Player, Custom String(":            LONG DASH            :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("INCREASED DASH'S DISTANCE", Null, Null, Null), Top, 3, White, White,
+				Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("GENJI: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("I DON'T NEED HEALING", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("IMMUNE", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("LONG DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("GENJI: TALENT 1 - I DON'T NEED HEALING")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		"HEAL AMOUNT"
+		Set Player Variable(Event Player, TalentVar1, Multiply(Max Health(Victim), 0.150));
+		Heal(Event Player, Event Player, Player Variable(Event Player, TalentVar1));
+	}
+}
+
+rule("GENJI: TALENT 2 - MMUNE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Or(Compare(Has Status(Event Player, Asleep), ==, True), Compare(Has Status(Event Player, Stunned), ==, True)) == True;
+	}
+
+	actions
+	{
+		Clear Status(Event Player, Stunned);
+		Wait(0.500, Ignore Condition);
+		Clear Status(Event Player, Asleep);
+	}
+}
+
+rule("GENJI: TALENT 3 - LONG DASH")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 3;
+		Is Using Ability 1(Event Player) == True;
+		Has Status(Event Player, Hacked) == False;
+		Has Status(Event Player, Frozen) == False;
+		Has Status(Event Player, Stunned) == False;
+		Has Status(Event Player, Rooted) == False;
+		Has Status(Event Player, Knocked Down) == False;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, TalentVar1, Ray Cast Hit Position(Eye Position(Event Player), Add(Eye Position(Event Player),
+			Multiply(Facing Direction Of(Event Player), 1.500)), Null, Event Player, False));
+		Abort If(Compare(Distance Between(Eye Position(Event Player), Player Variable(Event Player, TalentVar1)), <, 1.500));
+		Teleport(Event Player, Add(Position Of(Event Player), Multiply(Facing Direction Of(Event Player), 0.800)));
+		Play Effect(All Players(All Teams), Good Pickup Effect, Red, Position Of(Event Player), 0.500);
+		Wait(0.016, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+disabled rule("--- MEI TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("MEI: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 3);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":         CRYO-FREEZE         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"INSTANTLY FREEZE ENEMIES WITHIN A 4-METER RADIUS WHILE USING CRYO-STASIS. YOU CAN't USE THE ULTIMATE", Null, Null, Null), Top,
+				3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":           FREEZE GUN           :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("INSTANTLY FREEZE WITH SECONDARY FIRE. BUT YOU CAN'T USE THE PRIMARY FIRE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			Create HUD Text(Event Player, Custom String(":            ICE SURFER            :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("SHOOT FROM PRIMARY FIRE AT YOUR FEET AND MOVE FASTER ON 50%", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("MEI: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("CRYO-FREEZE", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ultimate Ability Enabled(Event Player, False);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("FREEZE GUN", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Primary Fire Enabled(Event Player, False);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("ICE SURFER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("MEI: TALENT 1 - CRYO-FREEZE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Skip If(Compare(Entity Exists(Player Variable(Event Player, TalentEffectId)), ==, True), 4);
+		Create Effect(All Players(All Teams), Sparkles, Aqua, Position Of(Event Player), 4, Visible To Position and Radius);
+		Set Player Variable At Index(Event Player, TalentEffectId, 0, Last Created Entity);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Aqua, Event Player, 4, Visible To Position and Radius);
+		Set Player Variable At Index(Event Player, TalentEffectId, 1, Last Created Entity);
+		Set Player Variable(Event Player, TalentVar1, Filtered Array(All Living Players(Opposite Team Of(Team Of(Event Player))), Compare(
+			Distance Between(Position Of(Event Player), Position Of(Current Array Element)), <, 4)));
+		Modify Player Variable(Event Player, TalentVar1, Remove From Array By Value, Event Player);
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar1), Compare(Has Status(
+			Current Array Element, Frozen), ==, False)));
+		Set Status(Player Variable(Event Player, TalentVar2), Event Player, Frozen, 9999);
+		Wait(0.080, Ignore Condition);
+		Loop If Condition Is True;
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 0));
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 1));
+		Wait(0.400, Ignore Condition);
+		Clear Status(Player Variable(Event Player, TalentVar1), Frozen);
+	}
+}
+
+rule("MEI: TALENT 2 - FREEZ GUN")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Button Held(Event Player, Melee) == False;
+		Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Status(Victim, Attacker, Frozen, 0.450);
+	}
+}
+
+rule("MEI: TALENT 3 - SURFER - SPEED UP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 3;
+		Is Firing Primary(Event Player) == True;
+		Throttle Of(Event Player) == Forward;
+		Vertical Facing Angle Of(Event Player) > 30;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 150);
+	}
+}
+
+rule("MEI: TALENT 3 - SURFER - SPEED DOWN")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 3;
+		Or(Compare(Is Firing Primary(Event Player), ==, False), Or(Compare(Throttle Of(Event Player), !=, Forward), Compare(
+			Vertical Facing Angle Of(Event Player), <, 22))) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+disabled rule("--- ZENYATTA TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("ZENYATTA: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Zenyatta;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":            BOMBER             :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("ULTIMATE DEALS 100 HP OF DAMAGE / SECOND TO ALL ENEMIES WITHIN RANGE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":     THIS IS SPARTAA     :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"PUSH ENEMIES WITH YOUR FOOT, KNOCKING THEM DOWN FOR 1 SECOND AND GET 30 HP OF HEALING", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("ZENYATTA: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Zenyatta;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOMBER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("THIS IS SPARTAA!", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("ZENYATTA: TALENT 1 - BOMBER")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Zenyatta;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Play Effect(All Players(All Teams), Explosion Sound, Blue, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 200);
+		Play Effect(All Players(All Teams), Bad Explosion, Orange, Event Player, 7);
+		Set Player Variable(Event Player, TalentVar1, Players Within Radius(Position Of(Event Player), 10, Opposite Team Of(Team Of(
+			Event Player)), Surfaces And Enemy Barriers));
+		Skip If(Compare(Count Of(Player Variable(Event Player, TalentVar1)), ==, 0), 1);
+		Damage(Player Variable(Event Player, TalentVar1), Event Player, 50);
+		Wait(0.500, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("ZENYATTA: TALENT 2 - THIS IS SPARTAA!")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Zenyatta;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+	}
+
+	actions
+	{
+		Abort If(Compare(Is Button Held(Event Player, Melee), ==, False));
+		Heal(Event Player, Event Player, 30);
+		Apply Impulse(Victim, Vector(X Component Of(Facing Direction Of(Event Player)), 0.700, Z Component Of(Facing Direction Of(
+			Event Player))), 14, To World, Cancel Contrary Motion);
+		Set Status(Victim, Event Player, Knocked Down, 0.300);
+		Set Move Speed(Event Player, 40);
+		Wait(0.600, Ignore Condition);
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+disabled rule("--- MCCREE TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("MCCREE: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		McCree;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":        FLASH BACK         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU TELEPORT BEHIND A STUNNED ENEMY", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String("BOMBER | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("ULTIMATE DEALS 50 HP OF DAMAGE / SECOND TO ALL ENEMIES WITHIN RANGE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("MCCREE: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		McCree;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("FLASH BACK", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOMBER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("MCCREE: TALENT 1 - FLASH BACK")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		McCree;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(0.350, Ignore Condition);
+		"Stunned players array"
+		Set Player Variable(Event Player, TalentVar1, Filtered Array(All Living Players(Opposite Team Of(Team Of(Event Player))), Compare(
+			Has Status(Current Array Element, Stunned), ==, True)));
+		Abort If(Compare(Count Of(Player Variable(Event Player, TalentVar1)), ==, 0));
+		Play Effect(All Players(All Teams), Bad Pickup Effect, Blue, Event Player, 3);
+		Wait(0.016, Ignore Condition);
+		Teleport(Event Player, Nearest Walkable Position(World Vector Of(Backward, Value In Array(Player Variable(Event Player,
+			TalentVar1), 0), Rotation And Translation)));
+		Set Facing(Event Player, Direction Towards(Eye Position(Event Player), Eye Position(Value In Array(Player Variable(Event Player,
+			TalentVar1), 0))), To World);
+		Play Effect(All Players(All Teams), Good Pickup Effect, Blue, Position Of(Event Player), 3);
+	}
+}
+
+disabled rule("MCCREE: TALENT 2 - RELOAD")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		McCree;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		disabled Modify Player Variable(Event Player, Speed, Add, 20);
+		disabled Set Move Speed(Event Player, Player Variable(Event Player, Speed));
+		disabled Wait(3, Ignore Condition);
+		disabled Modify Player Variable(Event Player, Speed, Subtract, 20);
+		disabled Set Move Speed(Event Player, Player Variable(Event Player, Speed));
+		Apply Impulse(Event Player, Vector(0, 1, 0), 10, To World, Incorporate Contrary Motion);
+	}
+}
+
+disabled rule("--- ANA TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("ANA: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":             MEDIC             :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"HITS ON ENEMIES REDUCE THEIR HEALING BY 30% AND ON ALLIES INCREASE HEALING BY 30% FOR 3 SECONDS", Null, Null, Null), Top, 3,
+				White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":       HEALING DART       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("GET 250 HP OF HEALING AFTER HIT DART THE ENEMY", Null, Null, Null), Top,
+				3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("ANA: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("MEDIC", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("HEALING DART", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("ANA: TALENT 1 - MEDIC DEALT HEALING")
+{
+	event
+	{
+		Player Dealt Healing;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Entity Exists(Player Variable(Healee, AnaMedicBadEffectId)) == False;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Skip If(Compare(Entity Exists(Player Variable(Healee, AnaMedicGoodEffectId)), ==, True), 3);
+		Create Effect(All Players(All Teams), Bad Aura, Yellow, Healee, 0.500, Visible To Position and Radius);
+		Set Player Variable(Healee, AnaMedicGoodEffectId, Last Created Entity);
+		Set Healing Received(Healee, 130);
+		disabled Set Player Variable(Event Player, TalentVar1, Total Time Elapsed);
+		Set Player Variable(Healee, AnaMedicGoodEffectTime, Add(Total Time Elapsed, 3));
+	}
+}
+
+rule("ANA: TALENT 1 - MEDIC DEALT DAMAGE")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Skip If(Compare(Entity Exists(Player Variable(Victim, AnaMedicBadEffectId)), ==, True), 3);
+		Create Effect(All Players(All Teams), Bad Aura, Purple, Victim, 0.500, Visible To Position and Radius);
+		Set Player Variable(Victim, AnaMedicBadEffectId, Last Created Entity);
+		Set Healing Received(Victim, 70);
+		Set Player Variable(Victim, AnaMedicBadEffectTime, Add(Total Time Elapsed, 3));
+	}
+}
+
+rule("ANA: TALENT 1: PLAYER ALL: GOOD EFFECT BY ANA MEDIC")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Total Time Elapsed > Player Variable(Event Player, AnaMedicGoodEffectTime);
+	}
+
+	actions
+	{
+		If(Compare(Entity Exists(Player Variable(Event Player, AnaMedicGoodEffectId)), ==, True));
+			Destroy Effect(Player Variable(Event Player, AnaMedicGoodEffectId));
+			Set Player Variable(Event Player, AnaMedicGoodEffectId, Null);
+			Set Healing Received(Event Player, 100);
+		End;
+	}
+}
+
+rule("ANA: TALENT 1: PLAYER ALL: BAD EFFECT BY ANA MEDIC")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Total Time Elapsed > Player Variable(Event Player, AnaMedicBadEffectTime);
+	}
+
+	actions
+	{
+		If(Compare(Entity Exists(Player Variable(Event Player, AnaMedicBadEffectId)), ==, True));
+			Destroy Effect(Player Variable(Event Player, AnaMedicBadEffectId));
+			Set Player Variable(Event Player, AnaMedicBadEffectId, Null);
+			Set Healing Received(Event Player, 100);
+		End;
+	}
+}
+
+rule("ANA: TALENT 2 - HEALING DART")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+	}
+
+	actions
+	{
+		"Flag for abort action list"
+		Set Player Variable(Event Player, TalentVar1, False);
+		"FFA"
+		If(Compare(Current Game Mode, ==, Game Mode(Deathmatch)));
+			If(Or(Compare(Event Damage, ==, 5), Compare(Event Damage, ==, 7.500)));
+				"Flag for abort action list"
+				Set Player Variable(Event Player, TalentVar1, True);
+			End;
+		"Team game modes"
+		Else;
+			If(Compare(Team Of(Event Player), ==, Team 1));
+				If(Or(Compare(Event Damage, ==, Multiply(5, Global Variable(Team1Damage))), Compare(Event Damage, ==, Multiply(7.500,
+					Global Variable(Team1Damage)))));
+					"Flag for abort action list"
+					Set Player Variable(Event Player, TalentVar1, True);
+				End;
+			Else;
+				If(Or(Compare(Event Damage, ==, Multiply(5, Global Variable(Team2Damage))), Compare(Event Damage, ==, Multiply(7.500,
+					Global Variable(Team2Damage)))));
+					"Flag for abort action list"
+					Set Player Variable(Event Player, TalentVar1, True);
+				End;
+			End;
+		End;
+		Abort If(Compare(Player Variable(Event Player, TalentVar1), ==, False));
+		Start Heal Over Time(Event Player, Event Player, 5, 50);
+		Small Message(Event Player, Custom String("NICE SLEEP! YOU GOT HEALING: +250 HP", Null, Null, Null));
+	}
+}
+
+disabled rule("--- WIDOW TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("WIDOW: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":           RAILGUN           :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOU DEAL 140% DAMAGE AND CAN ONLY SHOOT WITH A 100% ZOOM CHARGE. ALL ABILITIES DISABLED", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":        FAST SNIPER        :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU DON'T SLOW DOWN WHEN YOU AIM", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("WIDOW: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("RAILGUN", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Ability 2 Enabled(Event Player, False);
+			Set Ultimate Ability Enabled(Event Player, False);
+			Set Player Variable(Event Player, DamageDealtCurrent, 140);
+			Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("FAST SNIPER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("WIDOW: TALENT 1 - RAILGUN - CAN SHOOT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == False;
+		Is Firing Secondary(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Wait(1.180, Abort When False);
+		Set Primary Fire Enabled(Event Player, True);
+	}
+}
+
+rule("WIDOW: TALENT 1 - RAILGUN - CAN NOT SHOOT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == False;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Set Primary Fire Enabled(Event Player, False);
+	}
+}
+
+rule("WIDOW: TALENT 1 - RAILGUN - DID SHOT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		"Update time for icon of dislocation"
+		Set Player Variable(Event Player, TalentVar4, Add(Total Time Elapsed, 4));
+		"Icon of dislocation"
+		Skip If(Compare(Entity Exists(Player Variable(Event Player, IconId)), ==, True), 2);
+		Create Icon(All Players(Opposite Team Of(Team Of(Event Player))), Position Of(Event Player), Exclamation Mark,
+			Visible To and Position, White, False);
+		Set Player Variable(Event Player, IconId, Last Created Entity);
+		Set Primary Fire Enabled(Event Player, False);
+		"All living players of opposite team"
+		disabled Set Player Variable(Event Player, TalentVar3, Filtered Array(All Players(Opposite Team Of(Team Of(Event Player))), Compare(Health(
+			Current Array Element), >, 0)));
+		"RAY CAST HIT POSITION"
+		Set Player Variable(Event Player, TalentVar2, Ray Cast Hit Position(Eye Position(Event Player), Add(Eye Position(Event Player),
+			Multiply(Facing Direction Of(Event Player), 999)), All Players(Opposite Team Of(All Teams)), Event Player, True));
+		disabled Create Beam Effect(Event Player, Grapple Beam, Eye Position(Event Player), Player Variable(Event Player, TalentVar2), White,
+			Visible To);
+		Play Effect(All Players(All Teams), Ring Explosion Sound, White, Eye Position(Event Player), 200);
+		Play Effect(All Players(All Teams), Ring Explosion, White, Eye Position(Event Player), 50);
+		"Event damage = 0"
+		disabled If(Compare(Player Variable(Event Player, TalentVar1), ==, 0));
+		Play Effect(All Players(All Teams), Good Explosion, Orange, Player Variable(Event Player, TalentVar2), 4);
+		Play Effect(All Players(All Teams), Ring Explosion, Orange, Player Variable(Event Player, TalentVar2), 10);
+		Play Effect(All Players(All Teams), Ring Explosion Sound, White, Player Variable(Event Player, TalentVar2), 200);
+		disabled End;
+		"Players within radius"
+		Set Player Variable(Event Player, TalentVar1, Players Within Radius(Player Variable(Event Player, TalentVar2), 7, Opposite Team Of(
+			Team Of(Event Player)), Surfaces And Enemy Barriers));
+		If(Compare(Count Of(Player Variable(Event Player, TalentVar1)), >, 0));
+			For Player Variable(Event Player, TalentVar3, 0, Count Of(Player Variable(Event Player, TalentVar1)), 1);
+				Apply Impulse(Value In Array(Player Variable(Event Player, TalentVar1), Player Variable(Event Player, TalentVar3)),
+					Direction Towards(Player Variable(Event Player, TalentVar2), Eye Position(Value In Array(Player Variable(Event Player,
+					TalentVar1), Player Variable(Event Player, TalentVar3)))), 15, To World, Incorporate Contrary Motion);
+				Damage(Value In Array(Player Variable(Event Player, TalentVar1), Player Variable(Event Player, TalentVar3)), Event Player, 20);
+				disabled Set Status(Value In Array(Player Variable(Event Player, TalentVar1), Player Variable(Event Player, TalentVar3)), Event Player,
+					Stunned, 0.050);
+			End;
+		End;
+		"Disable zoom mode after shot"
+		Set Status(Event Player, Null, Stunned, 0.005);
+		"Extra recoil"
+		Start Facing(Event Player, Add(Facing Direction Of(Event Player), Vector(0, 0.300, 0)), 150, To World, Direction and Turn Rate);
+		Wait(0.050, Ignore Condition);
+		Stop Facing(Event Player);
+	}
+}
+
+rule("WIDOW: TALENT 1 - RAILGUN - DESTROY ICON")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Total Time Elapsed > Player Variable(Event Player, TalentVar4);
+	}
+
+	actions
+	{
+		Destroy Icon(Player Variable(Event Player, IconId));
+	}
+}
+
+rule("WIDOW: TALENT 2 - FAST SNIPER - SPEED UP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+		Player Variable(Event Player, TalentVar1) == False;
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Speed Of(Event Player) < 3;
+	}
+
+	actions
+	{
+		"In zoom flag"
+		Set Player Variable(Event Player, TalentVar1, True);
+		Set Move Speed(Event Player, 200);
+	}
+}
+
+rule("WIDOW: TALENT 2 - FAST SNIPER - SPEED DOWN")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Widowmaker;
+	}
+
+	conditions
+	{
+		"ZOOM MODE FLAG"
+		Player Variable(Event Player, TalentVar1) == True;
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Speed Of(Event Player) > 5;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+		Set Player Variable(Event Player, TalentVar1, False);
+	}
+}
+
+disabled rule("--- DVA TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("DVA: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":         BOOP  TANK          :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU CAN REPEATEDLY PUSH THE SAME ENEMIES WHEN USING BOOSTERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":      ASSAULT TANK        :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("DAMAGE +45%, YOU DON'T SLOW DOWN WHILE SHOOTING. THE MATRIX IS DISABLED",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("DVA: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOOP TANK", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("ASSAULT TANK", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Secondary Fire Enabled(Event Player, False);
+			Set Player Variable(Event Player, DamageDealtCurrent, 145);
+			Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("D.VA: TALENT 1 - BOOP TANK")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		disabled Set Player Variable(Event Player, TalentVar2, Players Within Radius(Position Of(Event Player), 6, Opposite Team Of(Team Of(
+			Event Player)), Off));
+		Set Player Variable(Event Player, TalentVar2, Players Within Radius(Add(Position Of(Event Player), Multiply(Vector(X Component Of(
+			Facing Direction Of(Event Player)), 0, Z Component Of(Facing Direction Of(Event Player))), 3)), 2.500, Opposite Team Of(
+			Team Of(Event Player)), Surfaces));
+		Modify Player Variable(Event Player, TalentVar2, Remove From Array By Value, Event Player);
+		If(Compare(Count Of(Player Variable(Event Player, TalentVar2)), >, 0));
+			For Player Variable(Event Player, TalentVar1, 0, Count Of(Player Variable(Event Player, TalentVar2)), 1);
+				disabled Apply Impulse(Value In Array(Player Variable(Event Player, TalentVar2), Player Variable(Event Player, TalentVar1)),
+					Direction Towards(Position Of(Event Player), Eye Position(Value In Array(Player Variable(Event Player, TalentVar2),
+					Player Variable(Event Player, TalentVar1)))), 10, To World, Cancel Contrary Motion);
+				Apply Impulse(Value In Array(Player Variable(Event Player, TalentVar2), Player Variable(Event Player, TalentVar1)),
+					Facing Direction Of(Event Player), 15, To World, Cancel Contrary Motion);
+			End;
+		End;
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("DVA: TALENT 2 - ASSAULT TANK - SPEED UP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Firing Primary(Event Player) == True;
+		Is Using Ability 1(Event Player) == False;
+		Max Health(Event Player) > 250;
+	}
+
+	actions
+	{
+		Wait(0.100, Abort When False);
+		Set Move Speed(Event Player, 200);
+	}
+}
+
+rule("DVA: TALENT 2 - ASSAULT TANK - SPEED DOWN")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Or(Compare(Is Firing Primary(Event Player), ==, False), Compare(Is Using Ability 1(Event Player), ==, True)) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+disabled rule("--- REINHARDT TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("REINHARDT: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":       TRAIN-HARDT       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOUR CHARGE ABILITY CAN KNOCK ENEMIES FOR 4 SECONDS. HOLD 'SHIFT' TO SLOW DOWN SPEED. ULTIMATE IS DISABLED", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":     DEATH MACHINE     :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"Your max health increased by 100%, damage dealt by 75%, move speed by 20%. Shield disabled", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("REINHARDT: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("TRAIN-HARDT", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ultimate Ability Enabled(Event Player, False);
+			"Speed of charge"
+			Set Player Variable(Event Player, TalentVar2, 100);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("DEATH MACHINE", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Secondary Fire Enabled(Event Player, False);
+			Set Move Speed(Event Player, 120);
+			Set Max Health(Event Player, 200);
+			Set Player Variable(Event Player, DamageDealtCurrent, 175);
+			Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("REINHARDT: TALENT 1 - TRAINHARDT ( LOOP )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		If(Compare(Speed Of(Event Player), >, 7));
+			Play Effect(All Players(All Teams), Good Pickup Effect, Orange, Position Of(Event Player), 2.200);
+			"Players for stun"
+			Set Player Variable(Event Player, TalentVar1, Players Within Radius(Eye Position(Event Player), 3.500, Opposite Team Of(Team Of(
+				Event Player)), Surfaces));
+			Modify Player Variable(Event Player, TalentVar1, Remove From Array By Value, Event Player);
+			Set Player Variable(Event Player, TalentVar1, Filtered Array(Player Variable(Event Player, TalentVar1), Compare(Has Status(
+				Current Array Element, Knocked Down), ==, False)));
+			If(Compare(Count Of(Player Variable(Event Player, TalentVar1)), >, 0));
+				For Player Variable(Event Player, TalentVar3, 0, Count Of(Player Variable(Event Player, TalentVar1)), 1);
+					Apply Impulse(Value In Array(Player Variable(Event Player, TalentVar1), Player Variable(Event Player, TalentVar3)),
+						Direction Towards(Position Of(Event Player), Eye Position(Value In Array(Player Variable(Event Player, TalentVar1),
+						Player Variable(Event Player, TalentVar3)))), 25, To World, Incorporate Contrary Motion);
+					Set Status(Value In Array(Player Variable(Event Player, TalentVar1), Player Variable(Event Player, TalentVar3)), Event Player,
+						Knocked Down, 4);
+				End;
+			End;
+		End;
+		If(Compare(Is Button Held(Event Player, Ability 1), ==, True));
+			Modify Player Variable(Event Player, TalentVar2, Subtract, 1.300);
+			Set Move Speed(Event Player, Player Variable(Event Player, TalentVar2));
+		End;
+		Wait(0.050, Ignore Condition);
+		Loop If Condition Is True;
+		Set Player Variable(Event Player, TalentVar2, 100);
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+disabled rule("--- MERCY TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("MERCY: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		If(Compare(Current Game Mode, ==, Game Mode(Deathmatch)));
+			Set Player Variable(Event Player, MenuMaxTalents, 2);
+		Else;
+			Set Player Variable(Event Player, MenuMaxTalents, 3);
+		End;
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":          BUTTERFLY         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU CAN HOVER IN THE AIR. HEALING DEAL REDUCED BY 30%", Null, Null, Null),
+				Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":       BATTLE MERCY       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("INCREASED DAMAGE.  THE CADUCEUS AND SELF HEALING ARE DISABLED", Null,
+				Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			Create HUD Text(Event Player, Custom String(":          MASS RES          :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("OLD SCHOOL ULTIMATE. YOU CAN'T USE RESURRECTION ABILITY", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("MERCY: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BUTTERFLY", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Healing Dealt(Event Player, 70);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BATTLE MERCY", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Secondary Fire Enabled(Event Player, False);
+			Set Healing Dealt(Event Player, 0);
+			Set Player Variable(Event Player, DamageDealtCurrent, 150);
+			Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("MASS RES", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Create Effect(Event Player, Ring, Yellow, Subtract(Event Player, Vector(0, 0.500, 0)), 10, Visible To Position and Radius);
+			Set Player Variable At Index(Event Player, TalentEffectId, 0, Last Created Entity);
+			Set Ability 2 Enabled(Event Player, False);
+			Disallow Button(Event Player, Ultimate);
+			Set Player Variable(Event Player, TalentVar1, Empty Array);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("MERCY: TALENT 1 - BUTTERFLY  ( ON )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is In Air(Event Player) == True;
+		Is Button Held(Event Player, Jump) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 0);
+		Apply Impulse(Event Player, Vector(0.001, 0.001, 0.001), 0.001, To World, Cancel Contrary Motion);
+	}
+}
+
+rule("MERCY: TALENT 1 - BUTTERFLY  (OFF)")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Or(Compare(Is In Air(Event Player), ==, False), Compare(Is Button Held(Event Player, Jump), ==, False)) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("MERCY: TALENT 3 - MASS RES")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 3;
+		Is Button Held(Event Player, Ultimate) == True;
+		Ultimate Charge Percent(Event Player) >= 99;
+	}
+
+	actions
+	{
+		"All players in radius"
+		Set Player Variable(Event Player, TalentVar1, Players Within Radius(Position Of(Event Player), 10, Team Of(Event Player),
+			Surfaces));
+		Modify Player Variable(Event Player, TalentVar1, Remove From Array By Value, Event Player);
+		"Get all dead players"
+		Set Player Variable(Event Player, TalentVar1, Filtered Array(Player Variable(Event Player, TalentVar1), Compare(Is Dead(
+			Current Array Element), ==, True)));
+		If(Compare(Count Of(Player Variable(Event Player, TalentVar1)), >, 0));
+			Wait(0.500, Ignore Condition);
+			Communicate(Event Player, Ultimate Status);
+			Resurrect(Player Variable(Event Player, TalentVar1));
+			For Player Variable(Event Player, TalentVar4, 0, Count Of(Player Variable(Event Player, TalentVar1)), 1);
+				Play Effect(All Players(All Teams), Bad Pickup Effect, Yellow, Position Of(Value In Array(Player Variable(Event Player,
+					TalentVar1), Player Variable(Event Player, TalentVar4))), 3);
+			End;
+			Set Ultimate Charge(Event Player, 0);
+		End;
+	}
+}
+
+rule("MERCY: TALENT 3 - MASS RES ( KoCTbIJIb #3 ) SET ULTIMATE CHARGE 99%")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 3;
+		Ultimate Charge Percent(Event Player) > 99;
+	}
+
+	actions
+	{
+		"All players in radius"
+		Set Ultimate Charge(Event Player, 99);
+	}
+}
+
+disabled rule("--- BRIGITTE TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("BRIGITTE: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":    POWERFUL SHIELD    :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("pushes and knocks down the enemy for 2 seconds", Null, Null, Null), Top,
+				3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String("BOMBER | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("ULTIMATE DEALS 50 HP OF DAMAGE / SECOND TO ALL ENEMIES WITHIN RANGE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("BRIGITTE: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("POWERFUL SHIELD", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOMBER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("BRIGITTE: TALENT 1 - POWERFUL SHIELD")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+		Event Damage < 20;
+	}
+
+	actions
+	{
+		Apply Impulse(Victim, Vector(X Component Of(Facing Direction Of(Event Player)), 1, Z Component Of(Facing Direction Of(
+			Event Player))), 6, To World, Cancel Contrary Motion);
+		Set Facing(Victim, Direction Towards(Position Of(Victim), Position Of(Event Player)), To World);
+		Set Status(Victim, Event Player, Knocked Down, 1.500);
+	}
+}
+
+disabled rule("--- JUNKRAT TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("JUNKRAT: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Junkrat;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":         NO GRAVITY        :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOUR PROJECTILES ARE NOT AFFECTED BY GRAVITY", Null, Null, Null), Top, 3,
+				White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String("BOMBER | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("ULTIMATE DEALS 50 HP OF DAMAGE / SECOND TO ALL ENEMIES WITHIN RANGE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("JUNKRAT: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Junkrat;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("NO GRAVITY", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Projectile Gravity(Event Player, 0);
+			Set Projectile Speed(Event Player, 150);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOMBER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+disabled rule("--- ASHE TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("ASHE: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 3);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":         HIGH NOON         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"the PRIMARY fire has the same damage as in the sight. dynamite and ultimate are disabled. SHOTGUN CAN'T DEAL DAMAGE", Null,
+				Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":            SNIPER            :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"in zoom mode, damage does not decrease with distance. Dynamite is disabled", Null, Null, Null), Top, 3, White, White, Green,
+				Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			Create HUD Text(Event Player, Custom String(":         NO TALENT          :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("DEFAULT ABILITIES FOR HERO", Null, Null, Null), Top, 3, White, White,
+				Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("ASHE: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("HIGH NOON", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ability 2 Enabled(Event Player, False);
+			Set Ultimate Ability Enabled(Event Player, False);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("SNIPER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ability 2 Enabled(Event Player, False);
+			"KocTbIJIb #1"
+			Set Player Variable(Event Player, TalentVar1, False);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("NO TALENT", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("ASHE: TALENT 1 - HIGH NOON  ( ZOOM OUT )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == False;
+		Is Using Ability 1(Event Player) == False;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, DamageDealtCurrent, Add, 112.500);
+		Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+	}
+}
+
+rule("ASHE: TALENT 1 - HIGH NOON  ( ZOOM IN )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, DamageDealtCurrent, Subtract, 112.500);
+		Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+	}
+}
+
+disabled rule("ASHE: TALENT 1 - HIGH NOON - SHOTGUN NERF")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		"Reset damage multiplier"
+		Set Damage Dealt(Event Player, 0);
+	}
+}
+
+rule("ASHE: TALENT 2 - SNIPER")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Firing Secondary(Event Player) == True;
+		Is Alive(Victim) == True;
+		"KocTbIJIb#1"
+		Player Variable(Event Player, TalentVar1) == False;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, DamageEventCurrent, Multiply(0.850, Player Variable(Event Player, DamageDealtCurrent)));
+		Skip If(Compare(Event Was Critical Hit, !=, True), 1);
+		Set Player Variable(Event Player, DamageEventCurrent, Multiply(Multiply(0.850, Player Variable(Event Player, DamageDealtCurrent)),
+			2.125));
+		"Damage is not reduced"
+		Abort If(Compare(Event Damage, ==, Player Variable(Event Player, DamageEventCurrent)));
+		Damage(Victim, Event Player, Subtract(Player Variable(Event Player, DamageEventCurrent), Event Damage));
+		"KocTbIJIb#1"
+		Set Player Variable(Event Player, TalentVar1, True);
+		Wait(0.100, Ignore Condition);
+		Set Player Variable(Event Player, TalentVar1, False);
+		disabled Modify Player Variable(Event Player, DamageEventCurrent, Add, 112.500);
+		disabled Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+		Small Message(Event Player, Custom String("ev dmg: {0},  ev dmg cur: {1}", Event Damage, Player Variable(Event Player,
+			DamageEventCurrent), Null));
+	}
+}
+
+disabled rule("--- BAPTISTE TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("BAPTISTE: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":       SELF HEALING       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU CAN GET HEALING FROM YOUR GRENADES, BUT YOU CAN'T USE YOUR ABILITIES",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String("BOMBER | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("ULTIMATE DEALS 50 HP OF DAMAGE / SECOND TO ALL ENEMIES WITHIN RANGE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("BAPTISTE: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("SELF HEALING", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Ability 2 Enabled(Event Player, False);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOMBER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("BAPTISTE: TALENT 1 - SELF HEALING")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		"Hit of healing nade"
+		Set Player Variable(Event Player, TalentVar1, Ray Cast Hit Position(Eye Position(Event Player), Add(Eye Position(Event Player),
+			Multiply(Facing Direction Of(Event Player), 999)), All Players(All Teams), Event Player, True));
+		Wait(0.200, Ignore Condition);
+		If(Compare(Distance Between(Position Of(Event Player), Player Variable(Event Player, TalentVar1)), <=, 4));
+			Heal(Event Player, Event Player, 50);
+		End;
+	}
+}
+
+disabled rule("--- ROADHOG TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("ROADHOG: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":          BOOP GUN          :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOUR HITS CAN BOOP ENEMIES. DAMAGE REDUCED BY 50%", Null, Null, Null),
+				Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String("BOMBER | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("ULTIMATE DEALS 50 HP OF DAMAGE / SECOND TO ALL ENEMIES WITHIN RANGE",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("ROADHOG: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOOP GUN", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Player Variable(Event Player, DamageDealtCurrent, 50);
+			Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BOMBER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("ROADHOG: TALENT 1 - BOOP GUN - DID SHOT -> GET FACING")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ultimate(Event Player) == False;
+		Or(Compare(Is Firing Primary(Event Player), ==, True), Compare(Is Firing Secondary(Event Player), ==, True)) == True;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, TalentVar1, Facing Direction Of(Event Player));
+		Abort If(Compare(Y Component Of(Player Variable(Event Player, TalentVar1)), >, 0.200));
+		Set Player Variable(Event Player, TalentVar1, Vector(X Component Of(Facing Direction Of(Event Player)), 0.200, Z Component Of(
+			Facing Direction Of(Event Player))));
+	}
+}
+
+rule("ROADHOG: TALENT 1 - BOOP GUN - APPLY FACING OF LAST SHOT TO IMPULSE")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		Apply Impulse(Victim, Player Variable(Event Player, TalentVar1), 15, To World, Cancel Contrary Motion);
+	}
+}
+
+disabled rule("--- PHARAH TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("PHARAH: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":          SUPER JET          :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"BUTTONS 'CROUCH' AND 'SPACE' CHANGE SPEED AND GRAVITY. YOUR MAX HEALTH REDUCED BY 40%. JUMP JET DISABLED", Null, Null, Null),
+				Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":           HARRIER           :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOU CAN HOVER IN THE AIR. 'CROUCH' AND 'JUMP' FOR CONTROLLING OF HEIGHT. ALL ABILITIES ARE DISABLED", Null, Null, Null), Top,
+				3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("PHARAH: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Custom String("SPEED: {0}", Player Variable(Event Player, TalentVar1), Null, Null), Custom String("SUPER JET", Null,
+				Null, Null), Left, 0, Blue, White, White, Visible To and String, Default Visibility);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Max Health(Event Player, 60);
+			"Current speed"
+			Set Player Variable(Event Player, TalentVar1, 1);
+			Set Player Variable(Event Player, Speed, 100);
+			"Current gravity"
+			Set Player Variable(Event Player, TalentVar2, 130);
+			Set Gravity(Event Player, Player Variable(Event Player, TalentVar2));
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("HARRIER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Ability 2 Enabled(Event Player, False);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("PHARAH: TALENT 1 - SUPER JET  ( SPEED UP )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Button Held(Event Player, Jump) == True;
+		Player Variable(Event Player, Speed) < 200;
+	}
+
+	actions
+	{
+		"Current speed"
+		Modify Player Variable(Event Player, TalentVar1, Add, 1);
+		Modify Player Variable(Event Player, Speed, Add, 50);
+		Set Move Speed(Event Player, Player Variable(Event Player, Speed));
+		"Current gravity"
+		Modify Player Variable(Event Player, TalentVar2, Subtract, 30);
+		Set Gravity(Event Player, Player Variable(Event Player, TalentVar2));
+	}
+}
+
+rule("PHARAH: TALENT 1 - SUPER JET  ( SPEED DOWN )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Button Held(Event Player, Crouch) == True;
+		Player Variable(Event Player, Speed) > 100;
+	}
+
+	actions
+	{
+		"Current speed"
+		Modify Player Variable(Event Player, TalentVar1, Subtract, 1);
+		Modify Player Variable(Event Player, Speed, Subtract, 50);
+		Set Move Speed(Event Player, Player Variable(Event Player, Speed));
+		"Current gravity"
+		Modify Player Variable(Event Player, TalentVar2, Add, 30);
+		Set Gravity(Event Player, Player Variable(Event Player, TalentVar2));
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("PHARAH: TALENT 1 - SUPER JET  ( ON GROUND )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is On Ground(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(0.300, Abort When False);
+		"Current speed"
+		Set Player Variable(Event Player, TalentVar1, 1);
+		Set Player Variable(Event Player, Speed, 100);
+		Set Move Speed(Event Player, Player Variable(Event Player, Speed));
+		"Current gravity"
+		Set Player Variable(Event Player, TalentVar2, 130);
+		Set Gravity(Event Player, Player Variable(Event Player, TalentVar2));
+	}
+}
+
+rule("PHARAH: TALENT 2 - HARRIER  ( MOVE UP )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Button Held(Event Player, Jump) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 0);
+		Wait(0.350, Ignore Condition);
+		Loop If Condition Is True;
+		Apply Impulse(Event Player, Vector(0.010, -0.010, 0.010), 0.010, To Player, Cancel Contrary Motion);
+	}
+}
+
+rule("PHARAH: TALENT 2 - HARRIER  ( MOVE DOWN )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Button Held(Event Player, Crouch) == True;
+		Is In Air(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 50);
+		Wait(0.200, Ignore Condition);
+		Loop If Condition Is True;
+		Apply Impulse(Event Player, Vector(0.010, 0.010, 0.010), 0.010, To Player, Cancel Contrary Motion);
+		If(Compare(Is On Ground(Event Player), ==, True));
+			Set Gravity(Event Player, 100);
+		Else;
+			Set Gravity(Event Player, 0);
+		End;
+	}
+}
+
+disabled rule("--- MOIRA TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("MOIRA: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 4);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":      SUPER SUPPORT      :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			If(Compare(Current Game Mode, !=, Game Mode(Deathmatch)));
+				Create HUD Text(Event Player, Null, Null, Custom String("USE YOUR FADE ABILITY FOR TELEPORT TO LOW HEALTH ALLY", Null, Null, Null),
+					Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			Else;
+				Create HUD Text(Event Player, Null, Null, Custom String("USE YOUR FADE ABILITY FOR TELEPORT TO LOW HEALTH ENEMY", Null, Null,
+					Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+			End;
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":           LONG  FADE          :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU CAN USE YOUR  FADE ABILITY AT A GREATER DISTANCE", Null, Null, Null),
+				Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			Create HUD Text(Event Player, Custom String(":            DD  MOIRA           :", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("INCREASED DAMAGE BY 20%. HEALING AND FADE ABILITY ARE DISABLED.", Null,
+				Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 4));
+			Create HUD Text(Event Player, Custom String(":      KNOCK MASTER      :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("SECONDARY FIRE ATTRACTS ENEMIES, ULTIMATE PUSHES ENEMIES", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("MOIRA: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("SUPER SUPPORT", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("LONG FADE", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("DD MOIRA", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Healing Dealt(Event Player, 0);
+			Set Player Variable(Event Player, DamageDealtCurrent, 120);
+			Set Damage Dealt(Event Player, Player Variable(Event Player, DamageDealtCurrent));
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 4));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("KNOCK MASTER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("MOIRA: TALENT 1 - SUPER SUPPORT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Wait(0.150, Ignore Condition);
+		If(Compare(Current Game Mode, ==, Game Mode(Deathmatch)));
+			"Team of event player"
+			Set Player Variable(Event Player, TalentVar1, Opposite Team Of(All Teams));
+		Else;
+			"Team of event player"
+			Set Player Variable(Event Player, TalentVar1, Team Of(Event Player));
+		End;
+		"All spawned players"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(All Players(Player Variable(Event Player, TalentVar1)), Compare(
+			Has Spawned(Current Array Element), ==, True)));
+		Modify Player Variable(Event Player, TalentVar2, Remove From Array By Value, Event Player);
+		"All living players of team"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar2), Compare(Is Alive(
+			Current Array Element), ==, True)));
+		"All no max health players of team"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar2), Compare(Normalized Health(
+			Current Array Element), <, 1)));
+		Abort If(Compare(Count Of(Player Variable(Event Player, TalentVar2)), ==, 0));
+		"Players for teleport"
+		Set Player Variable(Event Player, TalentVar2, Sorted Array(Player Variable(Event Player, TalentVar2), Normalized Health(
+			Current Array Element)));
+		"Lowest health player"
+		Set Player Variable(Event Player, TalentVar1, Value In Array(Player Variable(Event Player, TalentVar2), 0));
+		If(Compare(Is On Ground(Player Variable(Event Player, TalentVar2)), ==, True));
+			Teleport(Event Player, Nearest Walkable Position(Add(Position Of(Player Variable(Event Player, TalentVar1)), Vector(1, 0, 0))));
+		Else;
+			Teleport(Event Player, Add(Position Of(Player Variable(Event Player, TalentVar1)), Vector(1, 0, 0)));
+		End;
+		Start Facing(Event Player, Direction Towards(Eye Position(Event Player), Eye Position(Player Variable(Event Player, TalentVar1))),
+			2600, To World, Direction and Turn Rate);
+		Wait(0.350, Ignore Condition);
+		Stop Facing(Event Player);
+		Communicate(Event Player, Hello);
+	}
+}
+
+rule("MOIRA: TALENT 2 - LONG FADE")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 2;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 200);
+		Wait(1, Ignore Condition);
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("MOIRA: TALENT 4 - KNOCK MASTER")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Is Using Ultimate(Event Player), ==, True));
+			Apply Impulse(Victim, Facing Direction Of(Event Player), 9, To World, Incorporate Contrary Motion);
+		Else If(Compare(Is Firing Secondary(Event Player), ==, True));
+			Apply Impulse(Victim, Facing Direction Of(Event Player), -5.000, To World, Incorporate Contrary Motion);
+	}
+}
+
+disabled rule("--- SIGMA TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("SIGMA: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":        GRAVI-HAND        :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOUR KINETIC GRASP CAN CATCH ENEMY AND THROW THEM", Null, Null, Null),
+				Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":      HARD BARRIER       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOU CAN PUSH ENEMIES BY BARRIER WHILE IT MOVING. OTHER ABILITIES ARE DISABLED.", Null, Null, Null), Top, 3, White, White,
+				Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("SIGMA: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("GRAVI-HAND", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			"Catched player"
+			Set Player Variable(Event Player, TalentVar1, Null);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("HARD BARRIER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Player Variable(Event Player, SigmaBarrierPushPlayers, Empty Array);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Ability 2 Enabled(Event Player, False);
+			Set Ultimate Ability Enabled(Event Player, False);
+			Set Player Variable(Event Player, TalentVar1, Null);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("SIGMA: TALENT 1 - GRAVI-HAND")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Wait(0.150, Ignore Condition);
+		If(Compare(Player Variable(Event Player, TalentVar1), ==, Null));
+			Set Player Variable(Event Player, TalentVar1, Closest Player To(Add(Position Of(Event Player), Multiply(Facing Direction Of(
+				Event Player), 3.500)), Opposite Team Of(Team Of(Event Player))));
+			If(Or(Compare(Player Variable(Event Player, TalentVar1), ==, Event Player), Compare(Is Alive(Player Variable(Event Player,
+				TalentVar1)), ==, False)));
+				Set Player Variable(Event Player, TalentVar1, Null);
+				Loop If Condition Is True;
+			End;
+			Set Gravity(Player Variable(Event Player, TalentVar1), 0);
+			Set Status(Player Variable(Event Player, TalentVar1), Event Player, Stunned, 0.100);
+			Set Status(Player Variable(Event Player, TalentVar1), Event Player, Rooted, 5);
+			Start Accelerating(Player Variable(Event Player, TalentVar1), Direction Towards(Position Of(Player Variable(Event Player,
+				TalentVar1)), Add(Position Of(Event Player), Multiply(Facing Direction Of(Event Player), 2.500))), 150, 50, To World,
+				Direction Rate and Max Speed);
+		End;
+		Loop If Condition Is True;
+		Stop Accelerating(Player Variable(Event Player, TalentVar1));
+		Set Gravity(Player Variable(Event Player, TalentVar1), 100);
+		Clear Status(Player Variable(Event Player, TalentVar1), Rooted);
+		If(And(Compare(Is Using Ability 2(Event Player), ==, False), Compare(Is Alive(Event Player), ==, True)));
+			If(And(And(Compare(Has Status(Event Player, Knocked Down), ==, False), Compare(Has Status(Event Player, Asleep), ==, False)), And(
+				Compare(Has Status(Event Player, Frozen), ==, False), Compare(Has Status(Event Player, Stunned), ==, False))));
+				If(Compare(Has Status(Event Player, Hacked), ==, False));
+					Apply Impulse(Player Variable(Event Player, TalentVar1), Facing Direction Of(Event Player), 30, To World, Cancel Contrary Motion);
+					Set Status(Player Variable(Event Player, TalentVar1), Event Player, Knocked Down, 1);
+				End;
+			End;
+		End;
+		Set Player Variable(Event Player, TalentVar1, Null);
+		If(Compare(Ray Cast Hit Position(Player Variable(Event Player, TalentVar2), Add(Player Variable(Event Player, TalentVar2),
+			Multiply(Player Variable(Event Player, TalentVar1), 2)), Null, Event Player, False), ==, True));
+	}
+}
+
+rule("SIGMA: TALENT 2 - BARRIER")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 2;
+	}
+
+	actions
+	{
+		Skip If(Compare(Player Variable(Event Player, TalentVar1), !=, Null), 5);
+		"Barrier direction"
+		Set Player Variable(Event Player, TalentVar1, Facing Direction Of(Event Player));
+		"Barrier position"
+		Set Player Variable(Event Player, TalentVar2, Add(Eye Position(Event Player), Multiply(Facing Direction Of(Event Player), 4.500)));
+		"Effect"
+		Create Effect(All Players(All Teams), Good Aura, Orange, Player Variable(Event Player, TalentVar2), 3.500,
+			Visible To Position and Radius);
+		Set Player Variable(Event Player, TalentEffectId, Last Created Entity);
+		"debug"
+		disabled Create Effect(All Players(All Teams), Sphere, White, Player Variable(Event Player, TalentVar2), 4, Visible To Position and Radius);
+		"Captured players by barrier"
+		Set Player Variable(Event Player, TalentVar4, Players Within Radius(Player Variable(Event Player, TalentVar2), 4, Opposite Team Of(
+			Team Of(Event Player)), Off));
+		Modify Player Variable(Event Player, TalentVar4, Remove From Array By Value, Event Player);
+		"Nano stun for kill assist"
+		Set Status(Filtered Array(Player Variable(Event Player, TalentVar4), Compare(Player Variable(Current Array Element,
+			SigmaBarrierPushFlag), ==, False)), Event Player, Stunned, 0.005);
+		Modify Player Variable(Event Player, SigmaBarrierPushPlayers, Append To Array, Filtered Array(Player Variable(Event Player,
+			TalentVar4), Compare(Player Variable(Current Array Element, SigmaBarrierPushFlag), ==, False)));
+		Set Player Variable(Player Variable(Event Player, SigmaBarrierPushPlayers), SigmaBarrierPushFlag, True);
+		Apply Impulse(Player Variable(Event Player, TalentVar4), Direction Towards(Player Variable(Event Player, TalentVar2), Add(
+			Player Variable(Event Player, TalentVar2), Multiply(Player Variable(Event Player, TalentVar1), 1))), 15.700, To World,
+			Cancel Contrary Motion);
+		Set Player Variable(Event Player, TalentVar3, Vector(0, 0, 0));
+		"Correction of movement"
+		Set Player Variable(Event Player, TalentVar3, Ray Cast Hit Normal(Player Variable(Event Player, TalentVar2), Add(Player Variable(
+			Event Player, TalentVar2), Multiply(Player Variable(Event Player, TalentVar1), 4)), Null, Event Player, True));
+		If(Compare(Player Variable(Event Player, TalentVar3), !=, Vector(0, 0, 0)));
+			Modify Player Variable(Event Player, TalentVar1, Add, Player Variable(Event Player, TalentVar1));
+			Modify Player Variable(Event Player, TalentVar1, Add, Divide(Player Variable(Event Player, TalentVar3), 4));
+			Set Player Variable(Event Player, TalentVar1, Normalize(Player Variable(Event Player, TalentVar1)));
+		End;
+		"Update barrier position"
+		Set Player Variable(Event Player, TalentVar2, Add(Player Variable(Event Player, TalentVar2), Multiply(Player Variable(Event Player,
+			TalentVar1), 0.490)));
+		If(Compare(Y Component Of(Player Variable(Event Player, TalentVar1)), <, -0.553));
+			Skip(3);
+		End;
+		Wait(0.020, Ignore Condition);
+		Loop If Condition Is True;
+		Wait(0.050, Ignore Condition);
+		"Barrier direction"
+		Set Player Variable(Event Player, TalentVar1, Null);
+		Destroy Effect(Player Variable(Event Player, TalentEffectId));
+		Set Player Variable(Player Variable(Event Player, SigmaBarrierPushPlayers), SigmaBarrierPushFlag, False);
+		Set Player Variable(Event Player, SigmaBarrierPushPlayers, Empty Array);
+	}
+}
+
+disabled rule("--- ORISA TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("ORISA: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":         CONTESTER         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOU BECOME IMMORTAL AND GET HEALING WHILE YOU ARE USING FORTIFY ABILITY BUT YOU CAN'T SHOOT AND MOVE", Null, Null, Null), Top,
+				3, White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String(":      HARD BARRIER       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOU CAN PUSH ENEMIES BY BARRIER WHILE IT MOVING. OTHER ABILITIES ARE DISABLED.", Null, Null, Null), Top, 3, White, White,
+				Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("ORISA: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("CONTESTER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			"Catched player"
+			Set Player Variable(Event Player, TalentVar1, Null);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("HARD BARRIER", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Player Variable(Event Player, SigmaBarrierPushPlayers, Empty Array);
+			Set Ability 1 Enabled(Event Player, False);
+			Set Ability 2 Enabled(Event Player, False);
+			Set Ultimate Ability Enabled(Event Player, False);
+			Set Player Variable(Event Player, TalentVar1, Null);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("ORISA: TALENT 1 - CONTESTER")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Start Heal Over Time(Event Player, Event Player, 4, 30);
+		Communicate(Event Player, Group Up);
+		Set Status(Event Player, Null, Invincible, 4);
+		Set Status(Event Player, Null, Rooted, 4);
+		Set Primary Fire Enabled(Event Player, False);
+		Wait(4, Ignore Condition);
+		Set Primary Fire Enabled(Event Player, True);
+	}
+}
+
+disabled rule("--- TRACER TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("TRACER: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 2);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":        EXTRA  BOMB        :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOU CAN GET EXTRA BOMB AND USE IT IN ANY TIME", Null, Null, Null), Top, 3,
+				White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":         BLINK DASH         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("blink forward and inflict damage on enemies", Null, Null, Null), Top, 3,
+				White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("TRACER: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("EXTRA BOMB: {0}", Player Variable(Event Player, TalentVar1), Null, Null), Left, 0, Blue, White,
+				White, Visible To and String, Default Visibility);
+			"Extra bombs count"
+			Set Player Variable(Event Player, TalentVar1, 0);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BLINK DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			"Next time for the point update"
+			Set Player Variable(Event Player, TalentVar1, Add(Total Time Elapsed, 6));
+			Set Player Variable(Event Player, TalentVar2, Null);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("TRACER: TALENT 1 - EXTRA BOMB")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Ultimate Charge Percent(Event Player) == 100;
+		Is Button Held(Event Player, Ultimate) == False;
+		"Extra bombs count"
+		Player Variable(Event Player, TalentVar1) < 1;
+	}
+
+	actions
+	{
+		Modify Player Variable(Event Player, TalentVar1, Add, 1);
+		Set Ultimate Charge(Event Player, 0);
+	}
+}
+
+rule("TRACER: TALENT 1 - USE EXTRA BOMB")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ability 2(Event Player) == False;
+		Is Button Held(Event Player, Ultimate) == True;
+		Ultimate Charge Percent(Event Player) < 100;
+		"Extra bombs count"
+		Player Variable(Event Player, TalentVar1) > 0;
+	}
+
+	actions
+	{
+		"MEGA KocTbIJlb delay/loop"
+		Wait(0.020, Ignore Condition);
+		Loop If Condition Is True;
+		Abort If(Compare(Is Dead(Event Player), ==, True));
+		Abort If(Compare(Is Using Ultimate(Event Player), ==, True));
+		"Ñurrent ultimate charge"
+		Set Player Variable(Event Player, TalentVar2, Ultimate Charge Percent(Event Player));
+		Modify Player Variable(Event Player, TalentVar1, Subtract, 1);
+		Set Ultimate Charge(Event Player, 100);
+		Wait(0.050, Ignore Condition);
+		Press Button(Event Player, Ultimate);
+		Set Ultimate Charge(Event Player, Player Variable(Event Player, TalentVar2));
+	}
+}
+
+rule("TRACER: TALENT 2 - BLINK DASH")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		"Damaged players"
+		Set Player Variable(Event Player, TalentVar1, Empty Array);
+		"Pos before blink"
+		Set Player Variable At Index(Event Player, TalentVar2, 0, Add(Position Of(Event Player), Vector(0, 0.500, 0)));
+		Wait(0.090, Ignore Condition);
+		"Pos after blink"
+		Set Player Variable At Index(Event Player, TalentVar2, 1, Add(Position Of(Event Player), Vector(0, 0.500, 0)));
+		"Distance between start and end of blink"
+		Set Player Variable At Index(Event Player, TalentVar2, 2, Distance Between(Value In Array(Player Variable(Event Player,
+			TalentVar2), 0), Value In Array(Player Variable(Event Player, TalentVar2), 1)));
+		"Step of radius damage"
+		Set Player Variable At Index(Event Player, TalentVar2, 3, Round To Integer(Divide(Value In Array(Player Variable(Event Player,
+			TalentVar2), 2), 2.400), Up));
+		"Direction of blink"
+		Set Player Variable At Index(Event Player, TalentVar2, 4, Direction Towards(Value In Array(Player Variable(Event Player,
+			TalentVar2), 1), Value In Array(Player Variable(Event Player, TalentVar2), 0)));
+		For Player Variable(Event Player, TalentVar4, 0, Value In Array(Player Variable(Event Player, TalentVar2), 3), 1);
+			"Position of damage radius"
+			Set Player Variable At Index(Event Player, TalentVar2, 5, Add(Value In Array(Player Variable(Event Player, TalentVar2), 1),
+				Multiply(Value In Array(Player Variable(Event Player, TalentVar2), 4), Multiply(Player Variable(Event Player, TalentVar4),
+				2.500))));
+			Modify Player Variable(Event Player, TalentVar1, Append To Array, Players Within Radius(Value In Array(Player Variable(
+				Event Player, TalentVar2), 5), 2.800, Opposite Team Of(Team Of(Event Player)), Off));
+			Play Effect(All Players(All Teams), Bad Pickup Effect, Red, Value In Array(Player Variable(Event Player, TalentVar2), 5), 0.500);
+			"debug visuals"
+			disabled Wait(0.020, Ignore Condition);
+			disabled Create Effect(All Players(All Teams), Sphere, Purple, Value In Array(Player Variable(Event Player, TalentVar2), 5), 1.500,
+				Visible To);
+		End;
+		Modify Player Variable(Event Player, TalentVar1, Remove From Array By Value, Event Player);
+		Damage(Player Variable(Event Player, TalentVar1), Event Player, 50);
+	}
+}
+
+disabled rule("--- SOLDIER: 76 TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+disabled rule("DEBUG: SOLDIER 76: TALENT 1 - BOOST FIELD")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Create Effect(All Players(All Teams), Sphere, Green, Add(Eye Position(Event Player), World Vector Of(Vector(0.100, -0.350, 0.220),
+			Event Player, Rotation)), 0.100, Visible To Position and Radius);
+		Create Beam Effect(All Players(All Teams), Grapple Beam, Add(Eye Position(Event Player), World Vector Of(Vector(0.100, -0.350,
+			0.220), Event Player, Rotation)), Ray Cast Hit Position(Add(Eye Position(Event Player), World Vector Of(Vector(0.100, -0.350,
+			0.220), Event Player, Rotation)), Add(Add(Eye Position(Event Player), World Vector Of(Vector(0.100, -0.350, 0.220),
+			Event Player, Rotation)), Multiply(World Vector Of(Vector(0.010, -1.000, 0.200), Event Player, Rotation), 99)), Null,
+			Event Player, False), Purple, Visible To Position and Radius);
+	}
+}
+
+rule("SOLDIER 76: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 1);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":        BOOST FIELD        :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"YOUR BOOST FIELD AMPLIFIES DAMAGE BY 50% FOR ALL ALLIES INSIDE RING. HEALING IS DISABLED", Null, Null, Null), Top, 3, White,
+				White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			disabled Create HUD Text(Event Player, Custom String(":         BLINK DASH         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("blink forward and inflict damage on enemies", Null, Null, Null), Top, 3,
+				White, White, Green, Visible To and String, Default Visibility);
+			disabled Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			disabled Create HUD Text(Event Player, Custom String("AIMBOT DASH | COSTS: 12 UPGRADE POINTS", Null, Null, Null), Null, Null, Top, 2, Green,
+				White, White, Visible To and String, Default Visibility);
+			disabled Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			disabled Create HUD Text(Event Player, Null, Null, Custom String("YOU DEAL DAMAGE TO EVERY PLAYER WITHIN A RADIUS OF 8 METERS", Null, Null,
+				Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("SOLDIER 76: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Null, Null),
+				Null, Custom String("BOOST FIELD", Player Variable(Event Player, TalentVar1), Null, Null), Left, 0, Blue, White, White,
+				Visible To and String, Default Visibility);
+			Set Healing Dealt(Event Player, 0);
+			"Boost field position"
+			Set Player Variable(Event Player, TalentVar1, Null);
+			"Players within in boost field radius"
+			Set Player Variable(Event Player, TalentVar2, Empty Array);
+			"Boosted players"
+			Set Player Variable(Event Player, TalentVar3, Empty Array);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("BLINK DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			"Next time for the point update"
+			disabled Set Player Variable(Event Player, TalentVar1, Add(Total Time Elapsed, 6));
+			disabled Set Player Variable(Event Player, TalentVar2, Null);
+			disabled Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			disabled Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("AIM BOT DASH", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("SOLDIER 76: TALENT 1 - BOOST FIELD ( CREATE EFFECTS )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		"Position of the biotic field"
+		Set Player Variable(Event Player, TalentVar1, Ray Cast Hit Position(Add(Eye Position(Event Player), World Vector Of(Vector(0.100,
+			-0.350, 0.220), Event Player, Rotation)), Add(Add(Eye Position(Event Player), World Vector Of(Vector(0.100, -0.350, 0.220),
+			Event Player, Rotation)), Multiply(World Vector Of(Vector(0.010, -1.000, 0.200), Event Player, Rotation), 99)), Null,
+			Event Player, False));
+		Play Effect(All Players(All Teams), Bad Pickup Effect, Blue, Player Variable(Event Player, TalentVar1), 3);
+		Create Effect(All Players(All Teams), Energy Sound, White, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 60,
+			Visible To);
+		Set Player Variable At Index(Event Player, TalentEffectId, 0, Last Created Entity);
+		If(Compare(Team Of(Event Player), ==, Team 1));
+			Create Effect(All Players(All Teams), Ring, Team 1, Player Variable(Event Player, TalentVar1), 4.750, Visible To);
+			Set Player Variable At Index(Event Player, TalentEffectId, 1, Last Created Entity);
+			Create Effect(All Players(All Teams), Orb, Team 1, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 1, Visible To);
+		Else If(Compare(Team Of(Event Player), ==, Team 2));
+			Create Effect(All Players(All Teams), Ring, Team 2, Player Variable(Event Player, TalentVar1), 4.750, Visible To);
+			Set Player Variable At Index(Event Player, TalentEffectId, 1, Last Created Entity);
+			Create Effect(All Players(All Teams), Orb, Team 2, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 1, Visible To);
+		Else;
+			Create Effect(All Players(All Teams), Ring, Blue, Player Variable(Event Player, TalentVar1), 4.750, Visible To);
+			Set Player Variable At Index(Event Player, TalentEffectId, 1, Last Created Entity);
+			Create Effect(All Players(All Teams), Orb, Blue, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 1, Visible To);
+		End;
+		Set Player Variable At Index(Event Player, TalentEffectId, 2, Last Created Entity);
+	}
+}
+
+rule("SOLDIER 76: TALENT 1 - BOOST FIELD ( DESTROY EFFECTS )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == False;
+		Player Variable(Event Player, TalentEffectId) != Empty Array;
+		Player Variable(Event Player, TalentCurrent) == 1;
+	}
+
+	actions
+	{
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 0));
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 1));
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 2));
+		Play Effect(All Players(All Teams), Bad Explosion, Blue, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 2);
+		Play Effect(All Players(All Teams), Explosion Sound, Blue, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)), 100);
+		Set Player Variable(Event Player, TalentEffectId, Empty Array);
+		Set Player Variable(Event Player, TalentVar1, Null);
+	}
+}
+
+rule("SOLDIER 76: TALENT 1 - BOOST FIELD ( LOOP )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Player Variable(Event Player, TalentVar1) != Null;
+	}
+
+	actions
+	{
+		"Allies in ring"
+		Set Player Variable(Event Player, TalentVar2, Players Within Radius(Player Variable(Event Player, TalentVar1), 4.750, Team Of(
+			Event Player), Surfaces));
+		"All linivg allies"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar2), Compare(Is Alive(
+			Current Array Element), ==, True)));
+		"All allies that not amplified yet"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar2), Compare(Player Variable(
+			Current Array Element, SoldierBoostFieldEffectId), ==, Null)));
+		"Check allies out the ring"
+		Modify Player Variable(Event Player, TalentVar3, Append To Array, Player Variable(Event Player, TalentVar2));
+		For Player Variable(Event Player, TalentVar4, 0, Count Of(Player Variable(Event Player, TalentVar3)), 1);
+			Set Player Variable(Event Player, CurrentArrayElement, Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(
+				Event Player, TalentVar4)));
+			If(Compare(Distance Between(Player Variable(Event Player, TalentVar1), Position Of(Player Variable(Event Player,
+				CurrentArrayElement))), >, 4.750));
+				Destroy Effect(Player Variable(Player Variable(Event Player, CurrentArrayElement), SoldierBoostFieldEffectId));
+				Modify Player Variable(Player Variable(Event Player, CurrentArrayElement), DamageDealtCurrent, Subtract, 50);
+				Set Damage Dealt(Player Variable(Event Player, CurrentArrayElement), Player Variable(Player Variable(Event Player,
+					CurrentArrayElement), DamageDealtCurrent));
+				Set Player Variable(Player Variable(Event Player, CurrentArrayElement), SoldierBoostFieldEffectId, Null);
+				Modify Player Variable(Event Player, TalentVar3, Remove From Array By Index, Player Variable(Event Player, TalentVar4));
+			Else;
+				If(Compare(Player Variable(Player Variable(Event Player, CurrentArrayElement), SoldierBoostFieldEffectId), ==, Null));
+					Create Beam Effect(All Players(All Teams), Bad Beam, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)),
+						Player Variable(Event Player, CurrentArrayElement), Blue, Visible To);
+					Set Player Variable(Player Variable(Event Player, CurrentArrayElement), SoldierBoostFieldEffectId, Last Created Entity);
+					Modify Player Variable(Player Variable(Event Player, CurrentArrayElement), DamageDealtCurrent, Add, 50);
+					Set Damage Dealt(Player Variable(Event Player, CurrentArrayElement), Player Variable(Player Variable(Event Player,
+						CurrentArrayElement), DamageDealtCurrent));
+				End;
+			End;
+		End;
+		Wait(0.350, Ignore Condition);
+		Loop If Condition Is True;
+		"Destroy all boost effects"
+		For Player Variable(Event Player, TalentVar4, 0, Count Of(Player Variable(Event Player, TalentVar3)), 1);
+			Set Player Variable(Event Player, CurrentArrayElement, Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(
+				Event Player, TalentVar4)));
+			Destroy Effect(Player Variable(Player Variable(Event Player, CurrentArrayElement), SoldierBoostFieldEffectId));
+			Modify Player Variable(Player Variable(Event Player, CurrentArrayElement), DamageDealtCurrent, Subtract, 50);
+			Set Damage Dealt(Player Variable(Event Player, CurrentArrayElement), Player Variable(Player Variable(Event Player,
+				CurrentArrayElement), DamageDealtCurrent));
+		End;
+		Set Player Variable(Player Variable(Event Player, TalentVar3), SoldierBoostFieldEffectId, Null);
+		Set Player Variable(Event Player, TalentVar3, Empty Array);
+	}
+}
+
+disabled rule("SOLDIER 76: TALENT 1 - BOOST FIELD ( LOOP )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Player Variable(Event Player, TalentVar1) != Null;
+	}
+
+	actions
+	{
+		"Allies in ring"
+		Set Player Variable(Event Player, TalentVar2, Players Within Radius(Player Variable(Event Player, TalentVar1), 4.750, Team Of(
+			Event Player), Surfaces));
+		"All linivg allies"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar2), Compare(Is Alive(
+			Current Array Element), ==, True)));
+		"All allies that not amplified yet"
+		Set Player Variable(Event Player, TalentVar2, Filtered Array(Player Variable(Event Player, TalentVar2), Compare(Player Variable(
+			Current Array Element, SoldierBoostFieldEffectId), ==, Null)));
+		"Check allies out the ring"
+		Modify Player Variable(Event Player, TalentVar3, Append To Array, Player Variable(Event Player, TalentVar2));
+		For Player Variable(Event Player, TalentVar4, 0, Count Of(Player Variable(Event Player, TalentVar3)), 1);
+			Set Player Variable(Event Player, CurrentArrayElement, Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(
+				Event Player, TalentVar4)));
+			If(Compare(Distance Between(Player Variable(Event Player, TalentVar1), Position Of(Value In Array(Player Variable(Event Player,
+				TalentVar3), Player Variable(Event Player, TalentVar4)))), >, 4.750));
+				Destroy Effect(Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player,
+					TalentVar4)), SoldierBoostFieldEffectId));
+				Modify Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+					DamageDealtCurrent, Subtract, 50);
+				Set Damage Dealt(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+					Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+					DamageDealtCurrent));
+				Set Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+					SoldierBoostFieldEffectId, Null);
+				Modify Player Variable(Event Player, TalentVar3, Remove From Array By Index, Player Variable(Event Player, TalentVar4));
+			Else;
+				If(Compare(Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+					SoldierBoostFieldEffectId), ==, Null));
+					Create Beam Effect(All Players(All Teams), Bad Beam, Add(Player Variable(Event Player, TalentVar1), Vector(0, 3, 0)),
+						Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)), Blue, Visible To);
+					Set Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+						SoldierBoostFieldEffectId, Last Created Entity);
+					Set Damage Dealt(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)), 150);
+				End;
+			End;
+		End;
+		Wait(0.350, Ignore Condition);
+		Loop If Condition Is True;
+		"Destroy all boost effects"
+		For Player Variable(Event Player, TalentVar4, 0, Count Of(Player Variable(Event Player, TalentVar3)), 1);
+			Destroy Effect(Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player,
+				TalentVar4)), SoldierBoostFieldEffectId));
+		End;
+		Set Damage Dealt(Player Variable(Event Player, TalentVar3), 100);
+		Set Player Variable(Player Variable(Event Player, TalentVar3), SoldierBoostFieldEffectId, Null);
+		Set Player Variable(Event Player, TalentVar3, Empty Array);
+		Modify Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+			DamageDealtCurrent, Add, 50);
+		Set Damage Dealt(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+			Player Variable(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)),
+			DamageDealtCurrent));
+	}
+}
+
+disabled rule("SYMMETRA: PRIMARY FIRE")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Symmetra;
+	}
+
+	actions
+	{
+		Skip If(Compare(Is Firing Primary(Attacker), ==, False), 5);
+		Skip If(Not(Compare(Ray Cast Hit Player(Eye Position(Event Player), Add(Eye Position(Event Player), Multiply(Facing Direction Of(
+			Event Player), 12)), All Living Players(Opposite Team Of(Team Of(Event Player))), Event Player, True), ==, True)), 4);
+		Apply Impulse(Victim, Vector Towards(Position Of(Victim), Add(Position Of(Event Player), Vector(0, 0.300, 0))), 10, To World,
+			Cancel Contrary Motion);
+		Start Accelerating(Victim, Direction Towards(Victim, Add(Attacker, Multiply(Facing Direction Of(Attacker), 3))), 200, 25, To World,
+			Direction Rate and Max Speed);
+		Wait(0.030, Ignore Condition);
+		Loop If(Compare(Is Firing Primary(Event Player), ==, True));
+		disabled Set Damage Dealt(Event Player, Multiply(Player Variable(Event Player, DamageDealtCurrent), 10));
+		Stop Accelerating(Victim);
+	}
+}
+
+disabled rule("SOLDIER: SPRINTER-FLASH - LOOP")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Speed Of(Event Player) > 5;
+	}
+
+	actions
+	{
+		Wait(0.250, Ignore Condition);
+		"High speed effect"
+		Skip If(Compare(Speed Of(Event Player), <, 20), 1);
+		Play Effect(All Players(All Teams), Bad Pickup Effect, Orange, Event Player, Multiply(Speed Of(Event Player), 0.120));
+		If(Compare(Max Health(Event Player), >, 100));
+			"Speed +"
+			Modify Player Variable(Event Player, TalentVar1, Add, 5);
+			Set Move Speed(Event Player, Player Variable(Event Player, TalentVar1));
+			"Max Health -"
+			Modify Player Variable(Event Player, TalentVar2, Subtract, 1);
+			Set Max Health(Event Player, Player Variable(Event Player, TalentVar2));
+		End;
+		"Kicked players"
+		Set Player Variable(Event Player, TalentVar3, Players Within Radius(Position Of(Event Player), 3, Opposite Team Of(Team Of(
+			Event Player)), Off));
+		Modify Player Variable(Event Player, TalentVar3, Remove From Array By Value, Event Player);
+		For Player Variable(Event Player, TalentVar4, 0, Subtract(Count Of(Player Variable(Event Player, TalentVar3)), 1), 1);
+			Apply Impulse(Event Player, Direction Towards(Position Of(Event Player), Eye Position(Value In Array(Player Variable(Event Player,
+				TalentVar3), Player Variable(Event Player, TalentVar4)))), 25, To World, Cancel Contrary Motion);
+			"High speed stun"
+			Skip If(Compare(Speed Of(Event Player), <, 20), 1);
+			Set Status(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)), Event Player,
+				Knocked Down, 0.500);
+		End;
+		Loop If Condition Is True;
+		"Speed reset"
+		Set Move Speed(Event Player, 100);
+		Set Player Variable(Event Player, TalentVar1, 100);
+		"Max Health reset"
+		Set Player Variable(Event Player, TalentVar2, 100);
+		Set Max Health(Event Player, 100);
+	}
+}
+
+disabled rule("SOLDIER: SPRINTER-FLASH - KICK ENEMY")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Speed Of(Event Player) > 10;
+		Count Of(Players Within Radius(Position Of(Event Player), 3, Opposite Team Of(Team Of(Event Player)), Off)) == True;
+	}
+
+	actions
+	{
+		"Kicked players"
+		Set Player Variable(Event Player, TalentVar3, Players Within Radius(Position Of(Event Player), 3, Opposite Team Of(Team Of(
+			Event Player)), Off));
+		Modify Player Variable(Event Player, TalentVar3, Remove From Array By Value, Event Player);
+		For Player Variable(Event Player, TalentVar4, 0, Subtract(Count Of(Player Variable(Event Player, TalentVar3)), 1), 1);
+			Apply Impulse(Event Player, Direction Towards(Position Of(Event Player), Eye Position(Value In Array(Player Variable(Event Player,
+				TalentVar3), Player Variable(Event Player, TalentVar4)))), 25, To World, Cancel Contrary Motion);
+			"High speed stun"
+			Skip If(Compare(Speed Of(Event Player), <, 20), 1);
+			Set Status(Value In Array(Player Variable(Event Player, TalentVar3), Player Variable(Event Player, TalentVar4)), Event Player,
+				Knocked Down, 0.500);
+		End;
+	}
+}
+
+disabled rule("SOLDIER: INIT SPRINTER FLASH")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, TalentVar1, 100);
+		Set Player Variable(Event Player, TalentVar2, 100);
+	}
+}
+
+disabled rule("Rule 142")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	actions
+	{
+		Create Effect(All Players(All Teams), Sphere, Green, Add(Eye Position(Event Player), Multiply(Facing Direction Of(Event Player),
+			3)), 2.500, Visible To Position and Radius);
+	}
+}
+
+disabled rule("LUCIO: TALENT 1 - BOOP BUFF ( ENEMY )")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Victim, LucioBoopBuffFlag), ==, False));
+			Set Max Health(Victim, 80);
+			Set Player Variable(Victim, LucioBoopBuffFlag, True);
+		End;
+		Set Player Variable(Victim, LucioBoopBuffTime, Add(Total Time Elapsed, 5));
+	}
+}
+
+disabled rule("LUCIO: PLAYER ALL: TALENT 1 - BUFF EFFECT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, LucioBoopBuffFlag) == True;
+		Total Time Elapsed > Player Variable(Event Player, LucioBoopBuffTime);
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, LucioBoopBuffFlag, False);
+		Set Max Health(Event Player, 100);
+	}
+}
+
+disabled rule("--- LUCIO TALENTS ---")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+}
+
+rule("LUCIO: MENU - TALENT LIST")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, MenuState, 1);
+		Set Player Variable(Event Player, MenuMaxTalents, 3);
+		If(Compare(Player Variable(Event Player, TalentShop), ==, 1));
+			Create HUD Text(Event Player, Custom String(":    SOUND EXPLOSION    :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("YOUR ULTIMATE CAN THROW ENEMIES UP AND KNOCK DOWN THEM FOR 2 SECONDS",
+				Null, Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 2));
+			Create HUD Text(Event Player, Custom String(":         LOUD MUSIC         :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String(
+				"AMP 'E' DEALS DAMAGE TO ALL WITHIN RADIUS, BOOP CAN PUSH ENEMIES TO LONGER DISTANCE", Null, Null, Null), Top, 3, White, White,
+				Green, Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentShop), ==, 3));
+			Create HUD Text(Event Player, Custom String(":       DENSE  SOUND       :", Null, Null, Null), Null, Null, Top, 2, Green, White,
+				White, Visible To and String, Default Visibility);
+			Set Player Variable(Event Player, MenuTalentTextId, Last Text ID);
+			Create HUD Text(Event Player, Null, Null, Custom String("PROJECTILE HEALS YOUR ALLIES AND DAMAGE ENEMIES WITHIN RADIUS", Null,
+				Null, Null), Top, 3, White, White, Green, Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("LUCIO: MENU - SELECT TALENT")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, MenuState) == 4;
+	}
+
+	actions
+	{
+		If(Compare(Player Variable(Event Player, TalentCurrent), ==, 1));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Null, Null),
+				Null, Custom String("SOUND EXPLOSION", Player Variable(Event Player, TalentVar1), Null, Null), Left, 0, Blue, White, White,
+				Visible To and String, Default Visibility);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 2));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("LOUD MUSIC", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Player Variable(Event Player, TalentEffectId, Null);
+		Else If(Compare(Player Variable(Event Player, TalentCurrent), ==, 3));
+			Create HUD Text(All Players(Team Of(Event Player)), Custom String("{0}", Hero Icon String(Hero Of(Event Player)), Event Player,
+				Null), Null, Custom String("DENSE SOUND", Null, Null, Null), Left, 0, Blue, White, White, Visible To and String,
+				Default Visibility);
+			Set Player Variable(Event Player, TalentVar2, Null);
+			disabled Skip If(Compare(Is Using Ability 1(Event Player), ==, True), 3);
+			disabled Allow Button(Event Player, Ability 1);
+			disabled Press Button(Event Player, Ability 1);
+			disabled Wait(0.200, Ignore Condition);
+			disabled Set Ability 1 Enabled(Event Player, False);
+		End;
+		"HUD icon ID of player"
+		Set Player Variable(Event Player, PlayerTalentIconTextId, Last Text ID);
+		Call Subroutine(CloseTalentMenu);
+	}
+}
+
+rule("LUCIO: TALENT 1 - SOUND EXPLOSION")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 1;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(0.050, Ignore Condition);
+		Play Effect(All Players(All Teams), Good Explosion, Green, Event Player, 2);
+		Abort If(Compare(Is Dead(Event Player), ==, True));
+		Loop If(Compare(Is In Air(Event Player), ==, True));
+		disabled Abort If(Compare(Is Using Ultimate(Event Player), ==, False));
+		Set Player Variable(Event Player, TalentVar1, Players Within Radius(Position Of(Event Player), 20, Opposite Team Of(Team Of(
+			Event Player)), Surfaces));
+		Modify Player Variable(Event Player, TalentVar1, Remove From Array By Value, Event Player);
+		Apply Impulse(Player Variable(Event Player, TalentVar1), Vector(0, 1, 0), 15, To World, Cancel Contrary Motion);
+		Set Status(Player Variable(Event Player, TalentVar1), Event Player, Knocked Down, 2);
+		"Effect"
+		Play Effect(All Players(All Teams), Bad Explosion, Green, Position Of(Event Player), 25);
+		For Player Variable(Event Player, TalentVar4, 1, 7, 1);
+			Play Effect(All Players(All Teams), Ring Explosion, Green, Add(Position Of(Event Player), Vector(0, Multiply(1.200,
+				Player Variable(Event Player, TalentVar4)), 0)), Divide(70, Player Variable(Event Player, TalentVar4)));
+		End;
+	}
+}
+
+rule("LUCIO: TALENT 2 - LOUD MUSIC ( AMP 'E' )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(0.250, Ignore Condition);
+		Skip If(Compare(Player Variable(Event Player, TalentEffectId), !=, Null), 2);
+		Create Effect(All Players(All Teams), Ring, Red, Event Player, 10, Visible To Position and Radius);
+		Set Player Variable(Event Player, TalentEffectId, Last Created Entity);
+		Play Effect(All Players(All Teams), Bad Pickup Effect, Red, Event Player, 2);
+		Set Player Variable(Event Player, TalentVar1, Players Within Radius(Position Of(Event Player), 10, All Teams, Surfaces));
+		Damage(Player Variable(Event Player, TalentVar1), Event Player, 10);
+		Loop If Condition Is True;
+		Destroy Effect(Player Variable(Event Player, TalentEffectId));
+		Set Player Variable(Event Player, TalentEffectId, Null);
+	}
+}
+
+rule("LUCIO: TALENT 2 - LOUD MUSIC ( BOOP )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentCurrent) == 2;
+		Is Firing Secondary(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, TalentVar1, Filtered Array(Players Within Radius(Position Of(Event Player), 16, Opposite Team Of(
+			Team Of(Event Player)), Surfaces And Enemy Barriers), Is In View Angle(Event Player, Position Of(Current Array Element), 20)));
+		Modify Player Variable(Event Player, TalentVar1, Remove From Array By Value, Event Player);
+		Apply Impulse(Player Variable(Event Player, TalentVar1), Add(Facing Direction Of(Event Player), Vector(0, 0.500, 0)), 20, To World,
+			Cancel Contrary Motion);
+		Set Status(Player Variable(Event Player, TalentVar1), Event Player, Stunned, 0.001);
+		For Player Variable(Event Player, TalentVar4, 1, 5, 1);
+			Play Effect(All Players(All Teams), Good Explosion, Green, Add(Eye Position(Event Player), Multiply(Facing Direction Of(
+				Event Player), Multiply(3, Player Variable(Event Player, TalentVar4)))), Multiply(1.500, Player Variable(Event Player,
+				TalentVar4)));
+			Wait(0.030, Ignore Condition);
+		End;
+	}
+}
+
+rule("LUCIO: TALENT 3 - BOOP ( FIRE )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+		Player Variable(Event Player, TalentCurrent) == 3;
+	}
+
+	actions
+	{
+		Set Player Variable(Event Player, TalentVar1, Facing Direction Of(Event Player));
+		Set Player Variable(Event Player, TalentVar2, Add(Eye Position(Event Player), Multiply(Player Variable(Event Player, TalentVar1),
+			-0.500)));
+		Create Effect(All Players(Team Of(Event Player)), Orb, Green, Player Variable(Event Player, TalentVar2), 0.500,
+			Visible To Position and Radius);
+		Set Player Variable At Index(Event Player, TalentEffectId, 0, Last Created Entity);
+		Create Effect(All Players(Opposite Team Of(Team Of(Event Player))), Orb, Red, Player Variable(Event Player, TalentVar2), 0.500,
+			Visible To Position and Radius);
+		Set Player Variable At Index(Event Player, TalentEffectId, 1, Last Created Entity);
+	}
+}
+
+rule("LUCIO: TALENT 3 - BOOP ( LOOP - PROJECTILE FLY )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentVar2) != Null;
+		Player Variable(Event Player, TalentCurrent) == 3;
+	}
+
+	actions
+	{
+		Wait(0.020, Ignore Condition);
+		Set Player Variable(Event Player, TalentVar2, Add(Player Variable(Event Player, TalentVar2), Multiply(Player Variable(Event Player,
+			TalentVar1), 1.300)));
+		If(Compare(Distance Between(Player Variable(Event Player, TalentVar2), Ray Cast Hit Position(Player Variable(Event Player,
+			TalentVar2), Add(Player Variable(Event Player, TalentVar2), Multiply(Player Variable(Event Player, TalentVar1), 1.500)),
+			All Living Players(All Teams), Event Player, True)), ==, 1.500));
+			Loop If Condition Is True;
+		Else;
+			"All players within radius"
+			Set Player Variable(Event Player, TalentVar3, Players Within Radius(Player Variable(Event Player, TalentVar2), 8, All Teams, Off));
+			"All living players within radius"
+			Set Player Variable(Event Player, TalentVar3, Filtered Array(Player Variable(Event Player, TalentVar3), Compare(Is Alive(
+				Current Array Element), ==, True)));
+			If(Compare(Count Of(Player Variable(Event Player, TalentVar3)), ==, 0));
+				Skip(16);
+			End;
+			If(Compare(Current Game Mode, !=, Game Mode(Deathmatch)));
+				"Players of same team"
+				Set Player Variable(Event Player, TalentVar4, Filtered Array(Player Variable(Event Player, TalentVar3), Compare(Team Of(
+					Current Array Element), ==, Team Of(Event Player))));
+				If(Compare(Count Of(Player Variable(Event Player, TalentVar4)), >, 0));
+					Heal(Player Variable(Event Player, TalentVar4), Event Player, 100);
+				End;
+			End;
+			"Players of opposite team"
+			Set Player Variable(Event Player, TalentVar4, Filtered Array(Player Variable(Event Player, TalentVar3), Compare(Team Of(
+				Current Array Element), ==, Opposite Team Of(Team Of(Event Player)))));
+			If(Compare(Count Of(Player Variable(Event Player, TalentVar4)), >, 0));
+				For Player Variable(Event Player, TalentVar1, 0, Count Of(Player Variable(Event Player, TalentVar4)), 1);
+					Set Player Variable(Event Player, CurrentArrayElement, Value In Array(Player Variable(Event Player, TalentVar4), Player Variable(
+						Event Player, TalentVar1)));
+					Apply Impulse(Player Variable(Event Player, CurrentArrayElement), Direction Towards(Add(Player Variable(Event Player, TalentVar2),
+						Vector(0, -1.500, 0)), Add(Position Of(Player Variable(Event Player, CurrentArrayElement)), Multiply(Direction Towards(
+						Player Variable(Event Player, TalentVar2), Vector(X Component Of(Position Of(Player Variable(Event Player,
+						CurrentArrayElement))), 1, Z Component Of(Position Of(Player Variable(Event Player, CurrentArrayElement))))), 5))), 15,
+						To World, Cancel Contrary Motion);
+					Set Status(Player Variable(Event Player, CurrentArrayElement), Event Player, Stunned, 0.001);
+					Damage(Player Variable(Event Player, CurrentArrayElement), Event Player, 50);
+				End;
+			End;
+			Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 0));
+			Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 1));
+			Play Effect(All Players(Team Of(Event Player)), Good Explosion, Green, Player Variable(Event Player, TalentVar2), 4);
+			Play Effect(All Players(Opposite Team Of(Team Of(Event Player))), Good Explosion, Red, Player Variable(Event Player, TalentVar2),
+				4);
+			Set Player Variable(Event Player, TalentVar2, Null);
+		End;
+	}
+}
+
+rule("LUCIO: TALENT 3 - BOOP ( PROJECTILE LIFE TIME )")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lucio;
+	}
+
+	conditions
+	{
+		Player Variable(Event Player, TalentVar2) != Null;
+		Player Variable(Event Player, TalentCurrent) == 3;
+	}
+
+	actions
+	{
+		Wait(3.700, Abort When False);
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 0));
+		Destroy Effect(Value In Array(Player Variable(Event Player, TalentEffectId), 1));
+	}
+}

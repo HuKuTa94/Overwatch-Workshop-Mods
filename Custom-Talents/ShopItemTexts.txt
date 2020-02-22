@@ -1,0 +1,72 @@
+// Text for talent menu
+
+TALENT MENU OF {0}
+'ABILITY1' (SHIFT) - PREV TALENT
+'ABILITY2' (E) - NEXT TALENT
+'INTERACT' (F) - SELECT TALENT
+
+
+
+// Text for talent titles
+
+: I DONT NEED HEALING :
+:            LONG DASH            :
+:               IMMUNE               :
+
+:           FREEZE GUN           :
+:         CRYO-FREEZE         :
+:            ICE SURFER            :
+
+:     THIS IS SPARTAA     :
+:            BOMBER             :
+
+:        FLASH BACK         :
+
+:       HEALING DART       :
+:             MEDIC             :
+
+:           RAILGUN           :
+:        FAST SNIPER        :
+
+:         BOOP  TANK          :
+:      ASSAULT TANK        :
+
+:     DEATH MACHINE     :
+:       TRAIN-HARDT       :
+
+:       BATTLE MERCY       :
+:          BUTTERFLY         :
+:          MASS RES          :
+
+:    POWERFUL SHIELD    :
+
+:         NO GRAVITY        :
+
+:         HIGH NOON         :
+:            SNIPER            :
+:         NO TALENT          :
+
+:       SELF HEALING       :
+
+:          BOOP GUN          :
+
+:          SUPER JET          :
+:           HARRIER           :
+
+:      SUPER SUPPORT      :
+:           LONG  FADE          :
+:            DD  MOIRA           :
+:      KNOCK MASTER      :
+
+:        GRAVI-HAND        :
+:      HARD BARRIER       :
+
+:         CONTESTER         :
+
+:        EXTRA  BOMB        :
+: FORWARD TO THE PAST :
+
+:    SOUND EXPLOSION    :
+:         LOUD MUSIC         :
+:       DENSE  SOUND       :
+

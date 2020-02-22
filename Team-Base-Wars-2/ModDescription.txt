@@ -1,0 +1,16 @@
+New gameplay experience like the RUST, Nuclear Dawn games. 
+Each team has a commander who can build structures and use 
+the commander's abilities. To win the game your team must reach $5000 first. 
+Hold crouch + interaction ( C + F by default) to become a commander. 
+Hold INTERACTION (F) to open shop and begin to build a base. 
+To get money: 
+- kill enemies
+- steal from the enemy base
+- capture resource point
+- bring your loot to your base. 
+
+Have fun! 
+
+Mod by HuKuTa94 and Lionarius. 
+
+Join: discord.gg/NWd8tU3.
